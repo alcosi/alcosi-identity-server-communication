@@ -12,6 +12,26 @@ dependencies {
 }
 ````
 
+### Package Authentication
+There are packages that require authentication, including libraries/plugins developed by us which will go into OpenSource. Even when they are publicly available, a login to GitHub is necessary.
+    - Example from the build file:
+
+````kotlin
+repositories {
+//other repositories
+    maven {
+        name = "GitHub"
+        url = uri("https://maven.pkg.github.com/alcosi/alcosi-identity-server-communication")
+        credentials {
+            username = gitUsername //"${System.getenv()["GIHUB_PACKAGE_USERNAME"]}"
+            password = gitToken //"${System.getenv()["GIHUB_PACKAGE_TOKEN"]}"
+        }
+    }
+}
+````
+    - For local builds, credentials are taken from environment variables. Under CI/CD, your own accounts should be used, and these variables must be substituted accordingly.
+
+
 - Then get required components from spring boot context
 
 | Package                             | Name                                   |
