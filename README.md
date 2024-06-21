@@ -1,20 +1,8 @@
 ### Library for low-level communication with Alcosi (C#) identity service with spring boot initialization.
 
-### Using:
-
-- To use just add as dependency:
-
-````kotlin
-dependencies {
-//Other dependencies
-    implementation("com.alcosi:alcosi-identity-server-communication:${version}")
-//Other dependencies
-}
-````
-
 ### Package Authentication
 There are packages that require authentication, including libraries/plugins developed by us which will go into OpenSource. Even when they are publicly available, a login to GitHub is necessary.
-    - Example from the build file:
+- Example from the build file:
 
 ````kotlin
 repositories {
@@ -30,6 +18,20 @@ repositories {
 }
 ````
     - For local builds, credentials are taken from environment variables. Under CI/CD, your own accounts should be used, and these variables must be substituted accordingly.
+
+
+### Using:
+
+- To use just add as dependency:
+
+````kotlin
+dependencies {
+//Other dependencies
+    implementation("com.alcosi:alcosi-identity-server-communication:${version}")
+//Other dependencies
+}
+````
+
 
 
 - Then get required components from spring boot context
