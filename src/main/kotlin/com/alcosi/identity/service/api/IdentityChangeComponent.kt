@@ -14,39 +14,9 @@ import java.util.logging.Level
 import java.util.logging.Logger
 
 /**
- * The `IdentityChangeComponent` class is responsible for changing the identity information of a user, such as their photo.
- *
- * @property tokenHolder The client token holder for retrieving access tokens.
- * @property properties The properties of the identity server API.
- * @property mappingHelper The object mapper for mapping JSON data.
- * @property restClient The REST client for making HTTP requests. Default is `RestClient.create()`.
- * @property uri The URI template for the user endpoint.
- * @property logger The logger instance for logging messages related to this class.
- *
- * @constructor Creates an `IdentityChangeComponent` instance.
- * @param tokenHolder The client token holder for retrieving access tokens.
- * @param properties The properties of the identity server API.
- * @param mappingHelper The object mapper for mapping JSON data.
- * @param restClient The REST client for making HTTP requests. Default is `RestClient.create()`.
- *
- * @throws IdentityChangeAccountException If an error occurs during the account/user change.
+ * The `IdentityChangeComponent` interface defines the methods for changing the identity information of a user.
  */
-open class IdentityChangeComponent(
-    protected open val tokenHolder: IdentityClientTokenHolder,
-    protected open val properties: IdentityServerProperties.Api,
-    protected open val mappingHelper: ObjectMapper,
-    protected open val restClient: RestClient,
-) {
-    /**
-     * This variable represents the URI for the user endpoint.
-     * The URI is constructed by concatenating the base URI from the properties object with*/
-    protected open val uri = "${properties.uri}/user/{id}"
-    /**
-     * This property represents a logger instance for logging messages.
-     * It is used for logging messages related to the current class.
-     */
-    protected open val logger: Logger = Logger.getLogger(this.javaClass.name)
-
+interface IdentityChangeComponent {
     /**
      * Changes the photo of a user identified by their ID.
      *
@@ -54,12 +24,10 @@ open class IdentityChangeComponent(
      * @param image The new photo of the user. Can be null.
      * @return True if the photo was successfully changed, false otherwise.
      */
-    open fun changePhoto(
+    fun changePhoto(
         id: String,
         image: String?,
-    ): Boolean {
-        return change(id, IdentityChangeAccountRq(photo = image))
-    }
+    ): Boolean
 
     /**
      * Changes the account details of a user identified by their ID.
@@ -69,28 +37,92 @@ open class IdentityChangeComponent(
      * @return True if the account details were successfully changed, false otherwise.
      * @throws IdentityChangeAccountException if there was an error while changing the account details.
      */
-    open fun change(
+    fun change(
         id: String,
         rq: IdentityChangeAccountRq,
-    ): Boolean {
-        try {
-            return restClient
-                .put()
-                .uri(uri.replace("{id}", URLEncoder.encode(id, Charset.defaultCharset())))
-                .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
-                .header("x-api-version", properties.apiVersion)
-                .body(rq)
-                .parseExceptionAndExchange { _, clientResponse ->
-                    if (clientResponse.statusCode.is2xxSuccessful) {
-                        return@parseExceptionAndExchange true
-                    } else {
-                        val body = clientResponse.bodyTo(String::class.java)
-                        throw IdentityChangeAccountException(clientResponse.statusCode.value(), body)
+    ): Boolean
+
+
+    /**
+     * The `IdentityChangeComponent` class is responsible for changing the identity information of a user, such as their photo.
+     *
+     * @property tokenHolder The client token holder for retrieving access tokens.
+     * @property properties The properties of the identity server API.
+     * @property mappingHelper The object mapper for mapping JSON data.
+     * @property restClient The REST client for making HTTP requests. Default is `RestClient.create()`.
+     * @property uri The URI template for the user endpoint.
+     * @property logger The logger instance for logging messages related to this class.
+     *
+     * @constructor Creates an `IdentityChangeComponent` instance.
+     * @param tokenHolder The client token holder for retrieving access tokens.
+     * @param properties The properties of the identity server API.
+     * @param mappingHelper The object mapper for mapping JSON data.
+     * @param restClient The REST client for making HTTP requests. Default is `RestClient.create()`.
+     *
+     * @throws IdentityChangeAccountException If an error occurs during the account/user change.
+     */
+    open class Implementation(
+        protected open val tokenHolder: IdentityClientTokenHolder,
+        protected open val properties: IdentityServerProperties.Api,
+        protected open val mappingHelper: ObjectMapper,
+        protected open val restClient: RestClient,
+    ) : IdentityChangeComponent {
+        /**
+         * This variable represents the URI for the user endpoint.
+         * The URI is constructed by concatenating the base URI from the properties object with*/
+        protected open val uri = "${properties.uri}/user/{id}"
+
+        /**
+         * This property represents a logger instance for logging messages.
+         * It is used for logging messages related to the current class.
+         */
+        protected open val logger: Logger = Logger.getLogger(this.javaClass.name)
+
+        /**
+         * Changes the photo of a user identified by their ID.
+         *
+         * @param id The ID of the user.
+         * @param image The new photo of the user. Can be null.
+         * @return True if the photo was successfully changed, false otherwise.
+         */
+        override fun changePhoto(
+            id: String,
+            image: String?,
+        ): Boolean {
+            return change(id, IdentityChangeAccountRq(photo = image))
+        }
+
+        /**
+         * Changes the account details of a user identified by their ID.
+         *
+         * @param id The ID of profile (id , or email, or phone).
+         * @param rq The request object containing the updated account details.
+         * @return True if the account details were successfully changed, false otherwise.
+         * @throws IdentityChangeAccountException if there was an error while changing the account details.
+         */
+        override fun change(
+            id: String,
+            rq: IdentityChangeAccountRq,
+        ): Boolean {
+            try {
+                return restClient
+                    .put()
+                    .uri(uri.replace("{id}", URLEncoder.encode(id, Charset.defaultCharset())))
+                    .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
+                    .header("x-api-version", properties.apiVersion)
+                    .body(rq)
+                    .parseExceptionAndExchange { _, clientResponse ->
+                        if (clientResponse.statusCode.is2xxSuccessful) {
+                            return@parseExceptionAndExchange true
+                        } else {
+                            val body = clientResponse.bodyTo(String::class.java)
+                            throw IdentityChangeAccountException(clientResponse.statusCode.value(), body)
+                        }
                     }
-                }
-        } catch (t: Throwable) {
-            logger.log(Level.SEVERE,"Exception Identity server:", t)
-            throw if (t is IdentityException) t else IdentityChangeAccountException(exception = t)
+            } catch (t: Throwable) {
+                logger.log(Level.SEVERE, "Exception Identity server:", t)
+                throw if (t is IdentityException) t else IdentityChangeAccountException(exception = t)
+            }
         }
     }
 }

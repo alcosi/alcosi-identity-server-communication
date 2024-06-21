@@ -13,36 +13,10 @@ import java.util.logging.Level
 import java.util.logging.Logger
 
 /**
- * The `IdentityGetProfileIdByTokenComponent` class is responsible for
- * retrieving the user ID from the Identity server using the provided
- * token.
- *
- * @property mappingHelper The ObjectMapper used for mapping JSON responses
- *     to objects.
- * @property webClient The RestClient used for making HTTP requests.
- * @property properties The IdentityServerProperties.Ids object containing
- *     server configuration properties.
+ * The `IdentityGetProfileIdByTokenComponent` interface extends the `IdentityProfileIdByTokenProvider`
+ * interface and provides a method to retrieve the user ID associated with a token.
  */
-open class IdentityGetProfileIdByTokenComponent(
-    protected open val mappingHelper: ObjectMapper,
-    protected open val properties: IdentityServerProperties.Ids,
-    protected open val webClient: RestClient,
-) :IdentityProfileIdByTokenProvider{
-
-    /**
-     * The `getUserInfoUri` property represents the URI used to retrieve user
-     * information using a token.
-     *
-     * @property getUserInfoUri The URI for retrieving user information.
-     */
-    protected open val getUserInfoUri = "${properties.uri}/connect/userinfo"
-
-    /**
-     * This property represents a logger instance for logging messages. It is
-     * used for logging messages related to the current class.
-     */
-    protected open val logger: Logger = Logger.getLogger(this.javaClass.name)
-
+interface IdentityGetProfileIdByTokenComponent:IdentityProfileIdByTokenProvider {
     /**
      * Retrieves the user ID associated with the provided token.
      *
@@ -56,39 +30,87 @@ open class IdentityGetProfileIdByTokenComponent(
      * @throws IdentityException If an unexpected exception occurs while
      *     processing the request.
      */
-    open fun getProfileInfo(token: String): IdentityDomainUserIntrospectInfo {
-        try {
-            return webClient
-                .get()
-                .uri(getUserInfoUri)
-                .header("Authorization", "Bearer $token")
-                .exchange { _, clientResponse ->
-                    val body = clientResponse.bodyTo(String::class.java)
-                    if (clientResponse.statusCode.is2xxSuccessful) {
-                        val account = mappingHelper.readValue(body, IdentityUserInfoAccountRs::class.java)
-                        return@exchange account.toDomain()
-                    } else if (clientResponse.statusCode.value() == 401) {
-                        throw IdentityExpiredOrInvalidTokenException(clientResponse.statusCode.value(), body)
-                    } else {
-                        throw IdentityGetAccountIdByTokenException(clientResponse.statusCode.value(), body)
-                    }
-                }
-        } catch (t: Throwable) {
-            logger.log(Level.SEVERE, "Exception Identity server:", t)
-            throw if (t is IdentityException) t else IdentityGetAccountIdByTokenException(exception = t)
-        }
-    }
+    fun getProfileInfo(token: String): IdentityDomainUserIntrospectInfo
+
 
     /**
-     * Retrieves the identity profile ID associated with the provided token.
+     * The `IdentityGetProfileIdByTokenComponent` class is responsible for
+     * retrieving the user ID from the Identity server using the provided
+     * token.
      *
-     * @param token The authentication token.
-     * @return The identity profile ID.
-     * @throws IdentityExpiredOrInvalidTokenException If the token is expired or invalid.
-     * @throws IdentityGetAccountIdByTokenException If an error occurs while retrieving the profile ID.
-     * @throws IdentityException If an unexpected exception occurs while processing the request.
+     * @property mappingHelper The ObjectMapper used for mapping JSON responses
+     *     to objects.
+     * @property webClient The RestClient used for making HTTP requests.
+     * @property properties The IdentityServerProperties.Ids object containing
+     *     server configuration properties.
      */
-    override fun getIdentityProfileIdByToken(token: String): String {
-        return getProfileInfo(token).id
+    open class Implementation(
+        protected open val mappingHelper: ObjectMapper,
+        protected open val properties: IdentityServerProperties.Ids,
+        protected open val webClient: RestClient,
+    ) : IdentityGetProfileIdByTokenComponent {
+
+        /**
+         * The `getUserInfoUri` property represents the URI used to retrieve user
+         * information using a token.
+         *
+         * @property getUserInfoUri The URI for retrieving user information.
+         */
+        protected open val getUserInfoUri = "${properties.uri}/connect/userinfo"
+
+        /**
+         * This property represents a logger instance for logging messages. It is
+         * used for logging messages related to the current class.
+         */
+        protected open val logger: Logger = Logger.getLogger(this.javaClass.name)
+
+        /**
+         * Retrieves the user ID associated with the provided token.
+         *
+         * @param token The authentication token.
+         * @return The profile ID with info about two auth associated with the
+         *     token.
+         * @throws IdentityExpiredOrInvalidTokenException If the token is expired
+         *     or invalid.
+         * @throws IdentityGetAccountIdByTokenException If an error occurs while
+         *     retrieving the user ID.
+         * @throws IdentityException If an unexpected exception occurs while
+         *     processing the request.
+         */
+        override fun getProfileInfo(token: String): IdentityDomainUserIntrospectInfo {
+            try {
+                return webClient
+                    .get()
+                    .uri(getUserInfoUri)
+                    .header("Authorization", "Bearer $token")
+                    .exchange { _, clientResponse ->
+                        val body = clientResponse.bodyTo(String::class.java)
+                        if (clientResponse.statusCode.is2xxSuccessful) {
+                            val account = mappingHelper.readValue(body, IdentityUserInfoAccountRs::class.java)
+                            return@exchange account.toDomain()
+                        } else if (clientResponse.statusCode.value() == 401) {
+                            throw IdentityExpiredOrInvalidTokenException(clientResponse.statusCode.value(), body)
+                        } else {
+                            throw IdentityGetAccountIdByTokenException(clientResponse.statusCode.value(), body)
+                        }
+                    }
+            } catch (t: Throwable) {
+                logger.log(Level.SEVERE, "Exception Identity server:", t)
+                throw if (t is IdentityException) t else IdentityGetAccountIdByTokenException(exception = t)
+            }
+        }
+
+        /**
+         * Retrieves the identity profile ID associated with the provided token.
+         *
+         * @param token The authentication token.
+         * @return The identity profile ID.
+         * @throws IdentityExpiredOrInvalidTokenException If the token is expired or invalid.
+         * @throws IdentityGetAccountIdByTokenException If an error occurs while retrieving the profile ID.
+         * @throws IdentityException If an unexpected exception occurs while processing the request.
+         */
+        override fun getIdentityProfileIdByToken(token: String): String {
+            return getProfileInfo(token).id
+        }
     }
 }

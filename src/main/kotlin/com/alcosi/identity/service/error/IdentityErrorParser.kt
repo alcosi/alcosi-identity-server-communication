@@ -4,89 +4,13 @@ import com.alcosi.identity.exception.parser.api.*
 import com.alcosi.identity.exception.parser.ids.*
 import org.springframework.web.client.RestClient
 
-/**
- * IdentityErrorParser is a class that is responsible for parsing error responses from the Identity Server.
- * It provides methods to process specific types of exceptions and find exceptions based on the response received.
- *
- * ErrorVoter and ErrorSupplier are functional interfaces used by IdentityErrorParser to determine if an error response matches
- * a specific condition and create the corresponding exception, respectively.
- *
- * ErrorConfig is a helper class that holds an ErrorVoter and ErrorSupplier together.
- *
- * This class defines two lists: idsList and apiList, which store the ErrorConfigs for identification errors and API errors, respectively.
- *
- * The processIdsException method processes an identification error response by finding the corresponding exception and throwing it if it exists.
- *
- * The findIdsException method searches for the identification exception that matches the given response by iterating over the idsList and
- * checking if the ErrorVoter of each ErrorConfig votes for the response. It returns the first matching ErrorSupplier's created exception or null if no match is found.
- *
- * The processApiException method processes an API error response by finding the corresponding exception and throwing it if it exists.
- *
- * The findApiException method searches for the API exception that matches the given response by iterating over the apiList and
- * checking if the ErrorVoter of each ErrorConfig votes for the response. It returns the first matching ErrorSupplier's created exception or null if no match is found.
- *
- * The processAnyException method processes any type of error response by first trying to find an identification exception using
- * findIdsException and if not found, it searches for an API exception using findApiException. If an exception is found, it is thrown.
- *
- * The throwIfExist method is an extension function for Throwable that throws the exception if it is not null.
- *
- * Note: This class is open, allowing for subclassing and overriding of its methods and properties.
- * The class is not annotated with @author and @version tags as per the given instructions.
- */
-open class IdentityErrorParser {
-    /**
-     * Represents the configuration for handling errors.
-     *
-     * @param voter The error voter used to decide whether an error should be handled.
-     * @param errorSupplier The error supplier used to supply the error to be handled.
-     */
-    open class ErrorConfig(val voter: ErrorVoter, val errorSupplier: ErrorSupplier)
-
-    /**
-     * Represents the list of error configurations for handling errors related to Identity parsing.
-     * Each ErrorConfig object consists of an error voter and an error supplier.
-     */
-    open val idsList = mutableListOf(
-        ErrorConfig(
-            RegexMessageErrorVoter(listOf(".*The Code must be at least.*".toRegex(), ".*invalid_grant.*Invalid code.*".toRegex(), ".*Invalid code.*invalid_grant.*".toRegex())),
-            MessageErrorSupplier { msg, status -> IdentityInvalidTwoFaParserException(msg, status) }),
-        ErrorConfig(RegexMessageErrorVoter(".*Password not set.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityLockedAccountParserException(msg, status) }),
-        ErrorConfig(RegexMessageErrorVoter(".*User is locked out.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityLockedAccountParserException(msg, status) }),
-        ErrorConfig(RegexMessageErrorVoter(".*Password not set.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityNoPasswordParserException(msg, status) }),
-        ErrorConfig(RegexMessageErrorVoter(listOf(".*Account hasn't been activated.*".toRegex(), ".*Account hasn\\u0027t been activated.*".toRegex())), MessageErrorSupplier { msg, status -> IdentityNotActivatedParserException(msg, status) }),
-        ErrorConfig(RegexMessageErrorVoter(".*Invalid username or password.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityInvalidCredentialsParserException(msg, status) }),
-        ErrorConfig(RegexMessageErrorVoter(".*\\{\"error\"\\:\"invalid_grant\"\\}.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityInvalidTokenParserException(msg, status) }),
-        ErrorConfig(RegexMessageErrorVoter(".*Must be use 2FA code.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityUseTwoFaParserException(msg, status) }),
-        ErrorConfig(RegexMessageErrorVoter(".*Must use the code from the authenticator.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityUseAuthentificatorParserException(msg, status) }),
-    )
-
-    /**
-     * Represents a list of API error configurations.
-     *
-     * Each item in the list consists of an error voter and an error supplier.
-     *
-     * @property apiList The list of API error configurations.
-     */
-    open val apiList = mutableListOf(
-        ErrorConfig(RegexMessageErrorVoter(".*-2147483379.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityPasswordIsNotStrongEnoughParserException(msg, status) }),
-        ErrorConfig(RegexMessageErrorVoter(".*-2147483376.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityProfileNotExistOnIdentityParserException(msg, status) }),
-        ErrorConfig(RegexMessageErrorVoter(listOf(".*-2147483375.*".toRegex(), ".*-2147483372.*".toRegex())), MessageErrorSupplier { msg, status -> IdentityProfileIsAlreadyActivatedParserException(msg, status) }),
-        ErrorConfig(RegexMessageErrorVoter(".*-2147483374.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityWrongActivationCodeParserException(msg, status) }),
-        ErrorConfig(RegexMessageErrorVoter(listOf(".*-2147483371.*".toRegex(), ".*-2147483368.*".toRegex())), MessageErrorSupplier { msg, status -> IdentityProfileIsAlreadyRegisteredParserException(msg, status) }),
-        ErrorConfig(RegexMessageErrorVoter(".*-2147483366.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityInvalidAuthentificatorCodeParserException(msg, status) }),
-        ErrorConfig(RegexMessageErrorVoter(".*-2147483363.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityProfileIsAlreadyRegisteredAndActivatedParserException(msg, status) }),
-        ErrorConfig(RegexMessageErrorVoter(".*-2147483362.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityProfileIsAlreadyRegisteredButNotActivatedParserException(msg, status) }),
-    )
-
+interface IdentityErrorParser {
     /**
      * Process the exception related to the IDS.
      *
      * @param response The response object from the REST client.
      */
-    open fun processIdsException(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse) {
-        val exception = findIdsException(response)
-        exception.throwIfExist()
-    }
+    fun processIdsException(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse)
 
     /**
      * Finds an exception based on the given REST client response.
@@ -94,20 +18,14 @@ open class IdentityErrorParser {
      * @param response The response object from the REST client.
      * @return The throwable exception found based on the response, or null if no exception is found.
      */
-    open fun findIdsException(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse): Throwable? {
-        val exception = idsList.firstOrNull() { it.voter.vote(response) }?.errorSupplier?.create(response)
-        return exception
-    }
+    fun findIdsException(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse): Throwable?
 
     /**
      * Processes the API exception based on the given REST client response.
      *
      * @param response The response object from the REST client.
      */
-    open fun processApiException(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse) {
-        val exception = findApiException(response)
-        exception.throwIfExist()
-    }
+    fun processApiException(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse)
 
     /**
      * Finds an API exception based on the given REST client response.
@@ -115,33 +33,161 @@ open class IdentityErrorParser {
      * @param response The response object from the REST client.
      * @return The throwable exception found based on the response, or null if no exception is found.
      */
-    open fun findApiException(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse): Throwable? {
-        val exception = apiList.firstOrNull() { it.voter.vote(response) }?.errorSupplier?.create(response)
-        return exception
-    }
+    fun findApiException(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse): Throwable?
 
     /**
      * Processes any exception that may occur during the execution of the REST client request.
      *
      * @param response The response object from the REST client.
      */
-    open fun processAnyException(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse) {
-        val exception = findIdsException(response) ?: findApiException(response)
-        exception.throwIfExist()
-    }
+    fun processAnyException(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse)
 
     /**
      * Throws the throwable if it exists.
      *
      * @param throwable The throwable to be thrown.
      */
-    open fun Throwable?.throwIfExist() {
-        if (this != null) {
-            throw this
+    fun Throwable?.throwIfExist()
+
+
+    /**
+     * IdentityErrorParser is a class that is responsible for parsing error responses from the Identity Server.
+     * It provides methods to process specific types of exceptions and find exceptions based on the response received.
+     *
+     * ErrorVoter and ErrorSupplier are functional interfaces used by IdentityErrorParser to determine if an error response matches
+     * a specific condition and create the corresponding exception, respectively.
+     *
+     * ErrorConfig is a helper class that holds an ErrorVoter and ErrorSupplier together.
+     *
+     * This class defines two lists: idsList and apiList, which store the ErrorConfigs for identification errors and API errors, respectively.
+     *
+     * The processIdsException method processes an identification error response by finding the corresponding exception and throwing it if it exists.
+     *
+     * The findIdsException method searches for the identification exception that matches the given response by iterating over the idsList and
+     * checking if the ErrorVoter of each ErrorConfig votes for the response. It returns the first matching ErrorSupplier's created exception or null if no match is found.
+     *
+     * The processApiException method processes an API error response by finding the corresponding exception and throwing it if it exists.
+     *
+     * The findApiException method searches for the API exception that matches the given response by iterating over the apiList and
+     * checking if the ErrorVoter of each ErrorConfig votes for the response. It returns the first matching ErrorSupplier's created exception or null if no match is found.
+     *
+     * The processAnyException method processes any type of error response by first trying to find an identification exception using
+     * findIdsException and if not found, it searches for an API exception using findApiException. If an exception is found, it is thrown.
+     *
+     * The throwIfExist method is an extension function for Throwable that throws the exception if it is not null.
+     *
+     * Note: This class is open, allowing for subclassing and overriding of its methods and properties.
+     * The class is not annotated with @author and @version tags as per the given instructions.
+     */
+    open class Implementation : IdentityErrorParser {
+        /**
+         * Represents the configuration for handling errors.
+         *
+         * @param voter The error voter used to decide whether an error should be handled.
+         * @param errorSupplier The error supplier used to supply the error to be handled.
+         */
+        open class ErrorConfig(val voter: ErrorVoter, val errorSupplier: ErrorSupplier)
+
+        /**
+         * Represents the list of error configurations for handling errors related to Identity parsing.
+         * Each ErrorConfig object consists of an error voter and an error supplier.
+         */
+        open val idsList = mutableListOf(
+            ErrorConfig(
+                RegexMessageErrorVoter(listOf(".*The Code must be at least.*".toRegex(), ".*invalid_grant.*Invalid code.*".toRegex(), ".*Invalid code.*invalid_grant.*".toRegex())),
+                MessageErrorSupplier { msg, status -> IdentityInvalidTwoFaParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(".*Password not set.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityLockedAccountParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(".*User is locked out.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityLockedAccountParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(".*Password not set.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityNoPasswordParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(listOf(".*Account hasn't been activated.*".toRegex(), ".*Account hasn\\u0027t been activated.*".toRegex())), MessageErrorSupplier { msg, status -> IdentityNotActivatedParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(".*Invalid username or password.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityInvalidCredentialsParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(".*\\{\"error\"\\:\"invalid_grant\"\\}.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityInvalidTokenParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(".*Must be use 2FA code.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityUseTwoFaParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(".*Must use the code from the authenticator.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityUseAuthentificatorParserException(msg, status) }),
+        )
+
+        /**
+         * Represents a list of API error configurations.
+         *
+         * Each item in the list consists of an error voter and an error supplier.
+         *
+         * @property apiList The list of API error configurations.
+         */
+        open val apiList = mutableListOf(
+            ErrorConfig(RegexMessageErrorVoter(".*-2147483379.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityPasswordIsNotStrongEnoughParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(".*-2147483376.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityProfileNotExistOnIdentityParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(listOf(".*-2147483375.*".toRegex(), ".*-2147483372.*".toRegex())), MessageErrorSupplier { msg, status -> IdentityProfileIsAlreadyActivatedParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(".*-2147483374.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityWrongActivationCodeParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(listOf(".*-2147483371.*".toRegex(), ".*-2147483368.*".toRegex())), MessageErrorSupplier { msg, status -> IdentityProfileIsAlreadyRegisteredParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(".*-2147483366.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityInvalidAuthentificatorCodeParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(".*-2147483363.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityProfileIsAlreadyRegisteredAndActivatedParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(".*-2147483362.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityProfileIsAlreadyRegisteredButNotActivatedParserException(msg, status) }),
+        )
+
+        /**
+         * Process the exception related to the IDS.
+         *
+         * @param response The response object from the REST client.
+         */
+        override fun processIdsException(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse) {
+            val exception = findIdsException(response)
+            exception.throwIfExist()
+        }
+
+        /**
+         * Finds an exception based on the given REST client response.
+         *
+         * @param response The response object from the REST client.
+         * @return The throwable exception found based on the response, or null if no exception is found.
+         */
+        override fun findIdsException(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse): Throwable? {
+            val exception = idsList.firstOrNull() { it.voter.vote(response) }?.errorSupplier?.create(response)
+            return exception
+        }
+
+        /**
+         * Processes the API exception based on the given REST client response.
+         *
+         * @param response The response object from the REST client.
+         */
+        override fun processApiException(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse) {
+            val exception = findApiException(response)
+            exception.throwIfExist()
+        }
+
+        /**
+         * Finds an API exception based on the given REST client response.
+         *
+         * @param response The response object from the REST client.
+         * @return The throwable exception found based on the response, or null if no exception is found.
+         */
+        override fun findApiException(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse): Throwable? {
+            val exception = apiList.firstOrNull() { it.voter.vote(response) }?.errorSupplier?.create(response)
+            return exception
+        }
+
+        /**
+         * Processes any exception that may occur during the execution of the REST client request.
+         *
+         * @param response The response object from the REST client.
+         */
+        override fun processAnyException(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse) {
+            val exception = findIdsException(response) ?: findApiException(response)
+            exception.throwIfExist()
+        }
+
+        /**
+         * Throws the throwable if it exists.
+         *
+         * @param throwable The throwable to be thrown.
+         */
+        override fun Throwable?.throwIfExist() {
+            if (this != null) {
+                throw this
+            }
         }
     }
 }
-
 /**
  * IdentityErrorParserHolder is a singleton class that holds an instance of IdentityErrorParser. It provides access to the error parser instance.
  *
@@ -156,7 +202,7 @@ open class IdentityErrorParser {
  * Note: This class is not annotated with @author and @version tags as per the given instructions.
  */
 object IdentityErrorParserHolder  {
-    var errorParser: IdentityErrorParser = IdentityErrorParser()
+    var errorParser: IdentityErrorParser = IdentityErrorParser.Implementation()
 }
 
 /**

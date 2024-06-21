@@ -63,7 +63,7 @@ open class IdentityConfig {
         @Qualifier("identityServerObjectMapper") objectMapper: ObjectMapper,
         properties: IdentityServerProperties,
         @Qualifier("identityServerRestClient") restClient: RestClient,
-    ): IdentityTokenComponent = IdentityTokenComponent(objectMapper, properties.ids, restClient)
+    ): IdentityTokenComponent = IdentityTokenComponent.Implementation(objectMapper, properties.ids, restClient)
 
     @Bean("IdentityGetProfileIdByTokenComponent")
     @ConditionalOnMissingBean(IdentityGetProfileIdByTokenComponent::class)
@@ -71,7 +71,7 @@ open class IdentityConfig {
         @Qualifier("identityServerObjectMapper") objectMapper: ObjectMapper,
         properties: IdentityServerProperties,
         @Qualifier("identityServerRestClient") restClient: RestClient,
-    ): IdentityGetProfileIdByTokenComponent = IdentityGetProfileIdByTokenComponent(objectMapper, properties.ids, restClient)
+    ): IdentityGetProfileIdByTokenComponent = IdentityGetProfileIdByTokenComponent.Implementation(objectMapper, properties.ids, restClient)
 
     @Bean("IdentityIntrospectTokenComponent")
     @ConditionalOnMissingBean(IdentityIntrospectTokenComponent::class)
@@ -79,7 +79,7 @@ open class IdentityConfig {
         @Qualifier("identityServerObjectMapper") objectMapper: ObjectMapper,
         properties: IdentityServerProperties,
         @Qualifier("identityServerRestClient") restClient: RestClient,
-    ): IdentityIntrospectTokenComponent = IdentityIntrospectTokenComponent(objectMapper, properties.ids, restClient)
+    ): IdentityIntrospectTokenComponent = IdentityIntrospectTokenComponent.Implementation(objectMapper, properties.ids, restClient)
 
     //API
     @Bean("IdentityChangeContactComponent")
@@ -88,7 +88,7 @@ open class IdentityConfig {
         @Qualifier("identityServerObjectMapper") objectMapper: ObjectMapper,
         properties: IdentityServerProperties,
         @Qualifier("identityServerRestClient") restClient: RestClient,
-    ): IdentityChangeContactComponent = IdentityChangeContactComponent(properties.api, objectMapper, restClient)
+    ): IdentityChangeContactComponent = IdentityChangeContactComponent.Implementation(properties.api, objectMapper, restClient)
 
 
     @Bean("IdentityClientTokenHolder")
@@ -100,7 +100,7 @@ open class IdentityConfig {
         @Qualifier("identityServerRestClient") restClient: RestClient,
         @Qualifier("identitySynchronizationService") synchronizationService: SynchronizationService,
     ): IdentityClientTokenHolder =
-        IdentityClientTokenHolder(
+        IdentityClientTokenHolder.Implementation(
             tokenComponent,
             synchronizationService,
             properties.ids.apiClient.scope
@@ -119,7 +119,7 @@ open class IdentityConfig {
         @Qualifier("identityServerObjectMapper") objectMapper: ObjectMapper,
         properties: IdentityServerProperties,
         @Qualifier("identityServerRestClient") restClient: RestClient,
-    ): IdentityActivationCodeComponent = IdentityActivationCodeComponent(tokenHolder, properties.api, objectMapper, restClient)
+    ): IdentityActivationCodeComponent = IdentityActivationCodeComponent.Implementation(tokenHolder, properties.api, objectMapper, restClient)
 
     @Bean("IdentityChangeComponent")
     @ConditionalOnMissingBean(IdentityChangeComponent::class)
@@ -128,7 +128,7 @@ open class IdentityConfig {
         @Qualifier("identityServerObjectMapper") objectMapper: ObjectMapper,
         properties: IdentityServerProperties,
         @Qualifier("identityServerRestClient") restClient: RestClient,
-    ): IdentityChangeComponent = IdentityChangeComponent(tokenHolder, properties.api, objectMapper, restClient)
+    ): IdentityChangeComponent = IdentityChangeComponent.Implementation(tokenHolder, properties.api, objectMapper, restClient)
 
     @Bean("IdentityClaimsComponent")
     @ConditionalOnMissingBean(IdentityClaimsComponent::class)
@@ -137,7 +137,7 @@ open class IdentityConfig {
         @Qualifier("identityServerObjectMapper") objectMapper: ObjectMapper,
         properties: IdentityServerProperties,
         @Qualifier("identityServerRestClient") restClient: RestClient,
-    ): IdentityClaimsComponent = IdentityClaimsComponent(tokenHolder, properties.api, objectMapper, restClient)
+    ): IdentityClaimsComponent = IdentityClaimsComponent.Implementation(tokenHolder, properties.api, objectMapper, restClient)
 
     @Bean("IdentityDeleteComponent")
     @ConditionalOnMissingBean(IdentityDeleteComponent::class)
@@ -146,7 +146,7 @@ open class IdentityConfig {
         @Qualifier("identityServerObjectMapper") objectMapper: ObjectMapper,
         properties: IdentityServerProperties,
         @Qualifier("identityServerRestClient") restClient: RestClient,
-    ): IdentityDeleteComponent = IdentityDeleteComponent(tokenHolder, properties.api, objectMapper, restClient)
+    ): IdentityDeleteComponent = IdentityDeleteComponent.Implementation(tokenHolder, properties.api, objectMapper, restClient)
 
     @Bean("IdentityGetProfileComponent")
     @ConditionalOnMissingBean(IdentityGetProfileComponent::class)
@@ -155,7 +155,7 @@ open class IdentityConfig {
         @Qualifier("identityServerObjectMapper") objectMapper: ObjectMapper,
         properties: IdentityServerProperties,
         @Qualifier("identityServerRestClient") restClient: RestClient,
-    ): IdentityGetProfileComponent = IdentityGetProfileComponent(tokenHolder, properties.api, objectMapper, restClient)
+    ): IdentityGetProfileComponent = IdentityGetProfileComponent.Implementation(tokenHolder, properties.api, objectMapper, restClient)
 
     @Bean("IdentityRegistrationComponent")
     @ConditionalOnMissingBean(IdentityRegistrationComponent::class)
@@ -164,7 +164,7 @@ open class IdentityConfig {
         @Qualifier("identityServerObjectMapper") objectMapper: ObjectMapper,
         properties: IdentityServerProperties,
         @Qualifier("identityServerRestClient") restClient: RestClient,
-    ): IdentityRegistrationComponent = IdentityRegistrationComponent(tokenHolder, properties.api, objectMapper, restClient)
+    ): IdentityRegistrationComponent = IdentityRegistrationComponent.Implementation(tokenHolder, properties.api, objectMapper, restClient)
 
     @Bean("IdentityResetPasswordComponent")
     @ConditionalOnMissingBean(IdentityResetPasswordComponent::class)
@@ -173,7 +173,7 @@ open class IdentityConfig {
         @Qualifier("identityServerObjectMapper") objectMapper: ObjectMapper,
         properties: IdentityServerProperties,
         @Qualifier("identityServerRestClient") restClient: RestClient,
-    ): IdentityResetPasswordComponent = IdentityResetPasswordComponent(tokenHolder, properties.api, objectMapper, restClient)
+    ): IdentityResetPasswordComponent = IdentityResetPasswordComponent.Implementation(tokenHolder, properties.api, objectMapper, restClient)
 
     @Bean("IdentityRevokeTokenComponent")
     @ConditionalOnMissingBean(IdentityRevokeTokenComponent::class)
@@ -182,7 +182,7 @@ open class IdentityConfig {
         @Qualifier("identityServerObjectMapper") objectMapper: ObjectMapper,
         properties: IdentityServerProperties,
         @Qualifier("identityServerRestClient") restClient: RestClient,
-    ): IdentityRevokeTokenComponent = IdentityRevokeTokenComponent(tokenHolder, properties.api, properties.ids, objectMapper, restClient)
+    ): IdentityRevokeTokenComponent = IdentityRevokeTokenComponent.Implementation(tokenHolder, properties.api, properties.ids, objectMapper, restClient)
 
     @Bean("IdentityTwoFactorComponent")
     @ConditionalOnMissingBean(IdentityTwoFactorComponent::class)
@@ -191,5 +191,5 @@ open class IdentityConfig {
         @Qualifier("identityServerObjectMapper") objectMapper: ObjectMapper,
         properties: IdentityServerProperties,
         @Qualifier("identityServerRestClient") restClient: RestClient,
-    ): IdentityTwoFactorComponent = IdentityTwoFactorComponent(tokenHolder, properties.api, objectMapper, restClient)
+    ): IdentityTwoFactorComponent = IdentityTwoFactorComponent.Implementation(tokenHolder, properties.api, objectMapper, restClient)
 }
