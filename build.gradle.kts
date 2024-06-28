@@ -16,7 +16,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.allopen") version "2.0.0"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.0.0"
     id("com.bmuschko.docker-remote-api") version "9.4.0"
-    id("org.springframework.boot") version "3.3.0"
+    id("org.springframework.boot") version "3.3.1"
     id("io.spring.dependency-management") version "1.1.5"
     id("java-library")
     id("maven-publish")
@@ -40,7 +40,7 @@ val javaVersion = JavaVersion.VERSION_21
 val env = "RELEASE"
 
 group = "com.alcosi"
-version = "1.0-$env"
+version = "1.1-$env"
 java.sourceCompatibility = javaVersion
 
 idea {
@@ -132,10 +132,9 @@ configurations {
 
 
 dependencies {
-    compileOnly("org.springframework.boot:spring-boot-starter:3.0.0")
-    compileOnly("org.springframework.boot:spring-boot-starter-web:3.0.0")
-    api("io.github.breninsul:okhttp-logging-interceptor:1.0.1")
-    api("io.github.breninsul:rest-template-logging-interceptor:1.0.2")
+    compileOnly("org.springframework.boot:spring-boot-starter:3.3.1")
+    compileOnly("org.springframework.boot:spring-boot-starter-web:3.3.1")
+    api("io.github.breninsul:rest-template-logging-interceptor:1.0.3")
     api("commons-codec:commons-codec:1.17.0")
     api("com.squareup.wire:wire-grpc-client:4.9.9")
     api("io.github.breninsul:configurable-transaction-template-starter:1.0.2")
