@@ -63,7 +63,7 @@ interface IdentityTokenComponent {
     open class Implementation(
         protected open val mappingHelper: ObjectMapper,
         protected open val properties: IdentityServerProperties,
-        protected open val restClient: RestClient = RestClient.create(),
+        protected open val restClient: RestClient ,
         relativePath: String = "/connect/token",
     ) : IdentityTokenComponent {
         /**
