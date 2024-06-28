@@ -10,6 +10,7 @@ import com.alcosi.identity.exception.IdentityException
 import com.alcosi.identity.exception.api.IdentityChangeProfileContactsException
 import com.alcosi.identity.service.error.parseExceptionAndExchange
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.github.breninsul.rest.logging.RestTemplateConfigHeaders
 import org.springframework.web.client.RestClient
 import java.net.URLEncoder
 import java.nio.charset.Charset
@@ -84,19 +85,19 @@ interface IdentityChangeContactComponent {
      * @property restClient The REST client used for making HTTP requests.
      */
     open class Implementation(
-        protected open val properties: IdentityServerProperties.Api,
+        protected open val properties: IdentityServerProperties,
         protected open val mappingHelper: ObjectMapper,
         protected open val restClient: RestClient,
     ) : IdentityChangeContactComponent {
         /**
          * The URI for getting a profile code.
          */
-        protected open val getCodeUri = "${properties.uri}$/profile/{type}"
+        protected open val getCodeUri = "${properties.api.uri}$/profile/{type}"
 
         /**
          * URI for validating the code.
          */
-        protected open val validateCodeUri = "${properties.uri}$/profile/emailorphone"
+        protected open val validateCodeUri = "${properties.api.uri}$/profile/emailorphone"
 
         /**
          * This property represents a logger instance for logging messages. It is
@@ -127,7 +128,9 @@ interface IdentityChangeContactComponent {
                         .patch()
                         .uri(getCodeUri.replace("{type}", URLEncoder.encode(type.rqType.uriPath, Charset.defaultCharset())))
                         .header("Authorization", "Bearer $token")
-                        .header("x-api-version", properties.apiVersion)
+                        .header("x-api-version", properties.api.apiVersion)
+                        .headers { if (properties.disableBodyLoggingWithToken) it.set(RestTemplateConfigHeaders.LOG_REQUEST_HEADERS,"false") }
+                        .headers { if (properties.disableBodyLoggingWithCode) it.set(RestTemplateConfigHeaders.LOG_RESPONSE_BODY,"false") }
                         .body(rq)
                         .parseExceptionAndExchange { _, clientResponse ->
                             val body = clientResponse.bodyTo(String::class.java)
@@ -164,7 +167,9 @@ interface IdentityChangeContactComponent {
                     .put()
                     .uri(validateCodeUri)
                     .header("Authorization", "Bearer $token")
-                    .header("x-api-version", properties.apiVersion)
+                    .header("x-api-version", properties.api.apiVersion)
+                    .headers { if (properties.disableBodyLoggingWithToken) it.set(RestTemplateConfigHeaders.LOG_REQUEST_HEADERS,"false") }
+                    .headers { if (properties.disableBodyLoggingWithCode) it.set(RestTemplateConfigHeaders.LOG_REQUEST_BODY,"false") }
                     .body(rq)
                     .parseExceptionAndExchange { _, clientResponse ->
                         if (clientResponse.statusCode.is2xxSuccessful) {

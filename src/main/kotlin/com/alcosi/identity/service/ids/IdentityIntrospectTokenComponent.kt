@@ -9,6 +9,7 @@ import com.alcosi.identity.exception.ids.IdentityExpiredTokenException
 import com.alcosi.identity.exception.ids.IdentityIntrospectTokenException
 import com.alcosi.identity.exception.ids.IdentityInvalidTokenException
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.github.breninsul.rest.logging.RestTemplateConfigHeaders
 import org.apache.commons.codec.binary.Base64
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
@@ -48,7 +49,7 @@ interface IdentityIntrospectTokenComponent : IdentityProfileIdByTokenProvider {
      */
     open class Implementation(
         protected open val mappingHelper: ObjectMapper,
-        protected open val properties: IdentityServerProperties.Ids,
+        protected open val properties: IdentityServerProperties,
         protected open val webClient: RestClient,
     ) : IdentityIntrospectTokenComponent {
         /**
@@ -56,7 +57,7 @@ interface IdentityIntrospectTokenComponent : IdentityProfileIdByTokenProvider {
          * `properties` object and `relativePath`. This URI is used to retrieve
          * user information by token in the `getUserId` function.
          */
-        protected open val introspectUri = "${properties.uri}/connect/introspect"
+        protected open val introspectUri = "${properties.ids.uri}/connect/introspect"
 
         /**
          * This property represents a logger instance for logging messages. It is
@@ -83,6 +84,7 @@ interface IdentityIntrospectTokenComponent : IdentityProfileIdByTokenProvider {
                     .post()
                     .uri(introspectUri)
                     .header("Authorization", "Basic ${getBasicAuth()}")
+                    .headers { if (properties.disableBodyLoggingWithToken) it.set(RestTemplateConfigHeaders.LOG_REQUEST_BODY,"false") }
                     .body(formData)
                     .exchange { _, clientResponse ->
                         val body = clientResponse.bodyTo(String::class.java)
@@ -121,6 +123,6 @@ interface IdentityIntrospectTokenComponent : IdentityProfileIdByTokenProvider {
          *
          * @return The basic authentication string.
          */
-        protected open fun getBasicAuth(): String = Base64.encodeBase64String("${properties.introspectionClient.id}:${properties.introspectionClient.secret}".toByteArray())
+        protected open fun getBasicAuth(): String = Base64.encodeBase64String("${properties.ids.introspectionClient.id}:${properties.ids.introspectionClient.secret}".toByteArray())
     }
 }

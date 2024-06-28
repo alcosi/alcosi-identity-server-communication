@@ -2,6 +2,7 @@ package com.alcosi.identity.service.api
 
 import com.alcosi.identity.config.IdentityServerProperties
 import com.alcosi.identity.dto.api.IdentityChangeAccountRq
+import com.alcosi.identity.dto.domain.IdentityDomainChangeAccount
 import com.alcosi.identity.exception.api.IdentityChangeAccountException
 import com.alcosi.identity.exception.IdentityException
 import com.alcosi.identity.service.error.parseExceptionAndExchange
@@ -39,7 +40,7 @@ interface IdentityChangeComponent {
      */
     fun change(
         id: String,
-        rq: IdentityChangeAccountRq,
+        rq: IdentityDomainChangeAccount,
     ): Boolean
 
 
@@ -63,14 +64,14 @@ interface IdentityChangeComponent {
      */
     open class Implementation(
         protected open val tokenHolder: IdentityClientTokenHolder,
-        protected open val properties: IdentityServerProperties.Api,
+        protected open val properties: IdentityServerProperties,
         protected open val mappingHelper: ObjectMapper,
         protected open val restClient: RestClient,
     ) : IdentityChangeComponent {
         /**
          * This variable represents the URI for the user endpoint.
          * The URI is constructed by concatenating the base URI from the properties object with*/
-        protected open val uri = "${properties.uri}/user/{id}"
+        protected open val uri = "${properties.api.uri}/user/{id}"
 
         /**
          * This property represents a logger instance for logging messages.
@@ -89,7 +90,7 @@ interface IdentityChangeComponent {
             id: String,
             image: String?,
         ): Boolean {
-            return change(id, IdentityChangeAccountRq(photo = image))
+            return change(id, IdentityDomainChangeAccount(photoBase64 = image))
         }
 
         /**
@@ -102,15 +103,15 @@ interface IdentityChangeComponent {
          */
         override fun change(
             id: String,
-            rq: IdentityChangeAccountRq,
+            rq: IdentityDomainChangeAccount,
         ): Boolean {
             try {
                 return restClient
                     .put()
                     .uri(uri.replace("{id}", URLEncoder.encode(id, Charset.defaultCharset())))
                     .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
-                    .header("x-api-version", properties.apiVersion)
-                    .body(rq)
+                    .header("x-api-version", properties.api.apiVersion)
+                    .body(rq.toApi())
                     .parseExceptionAndExchange { _, clientResponse ->
                         if (clientResponse.statusCode.is2xxSuccessful) {
                             return@parseExceptionAndExchange true

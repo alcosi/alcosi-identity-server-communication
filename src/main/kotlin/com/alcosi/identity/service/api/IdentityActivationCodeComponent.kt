@@ -10,6 +10,7 @@ import com.alcosi.identity.exception.api.IdentityGetActivationCodeException
 import com.alcosi.identity.service.error.parseExceptionAndExchange
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.alcosi.identity.service.token.IdentityClientTokenHolder
+import io.github.breninsul.rest.logging.RestTemplateConfigHeaders
 import org.springframework.web.client.RestClient
 import java.net.URLEncoder
 import java.nio.charset.Charset
@@ -56,14 +57,14 @@ interface IdentityActivationCodeComponent {
      */
     open class Implementation(
         protected open val tokenHolder: IdentityClientTokenHolder,
-        protected open val properties: IdentityServerProperties.Api,
+        protected open val properties: IdentityServerProperties,
         protected open val mappingHelper: ObjectMapper,
         protected open val restClient: RestClient,
     ) : IdentityActivationCodeComponent {
         /**
          * The URI for activating a user account.
          */
-        protected open val uri = "${properties.uri}/user/{emailOrPhoneOrId}/activate"
+        protected open val uri = "${properties.api.uri}/user/{emailOrPhoneOrId}/activate"
 
         /**
          * This property represents a logger instance for logging messages.
@@ -85,7 +86,8 @@ interface IdentityActivationCodeComponent {
                     .get()
                     .uri(uri.replace("{emailOrPhoneOrId}", URLEncoder.encode(id, Charset.defaultCharset())))
                     .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
-                    .header("x-api-version", properties.apiVersion)
+                    .header("x-api-version", properties.api.apiVersion)
+                    .headers { if (properties.disableBodyLoggingWithCode) it.set(RestTemplateConfigHeaders.LOG_RESPONSE_BODY,"false") }
                     .parseExceptionAndExchange { _, clientResponse ->
                         val body = clientResponse.bodyTo(String::class.java)
                         if (clientResponse.statusCode.is2xxSuccessful) {
@@ -120,7 +122,8 @@ interface IdentityActivationCodeComponent {
                         .post()
                         .uri(uri.replace("{emailOrPhoneOrId}", URLEncoder.encode(id, Charset.defaultCharset())))
                         .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
-                        .header("x-api-version", properties.apiVersion)
+                        .header("x-api-version", properties.api.apiVersion)
+                        .headers { if (properties.disableBodyLoggingWithCode) it.set(RestTemplateConfigHeaders.LOG_REQUEST_BODY,"false") }
                         .body(IdentityActivationCode(code, token))
                         .exchange { _, clientResponse ->
                             val body = clientResponse.bodyTo(String::class.java)

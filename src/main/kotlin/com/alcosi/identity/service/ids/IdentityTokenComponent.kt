@@ -6,6 +6,7 @@ import com.alcosi.identity.dto.domain.IdentityDomainToken
 import com.alcosi.identity.exception.IdentityException
 import com.alcosi.identity.exception.ids.IdentityUnknownTokenException
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.github.breninsul.rest.logging.RestTemplateConfigHeaders
 import org.springframework.http.MediaType
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
@@ -61,14 +62,14 @@ interface IdentityTokenComponent {
      * @property relativePath The relative path to the token endpoint on the server. The default value is*/
     open class Implementation(
         protected open val mappingHelper: ObjectMapper,
-        protected open val properties: IdentityServerProperties.Ids,
+        protected open val properties: IdentityServerProperties,
         protected open val restClient: RestClient = RestClient.create(),
         relativePath: String = "/connect/token",
     ) : IdentityTokenComponent {
         /**
          * Represents the URI for the token.
          */
-        protected open val tokenUri = "${properties.uri}$relativePath"
+        protected open val tokenUri = "${properties.ids.uri}$relativePath"
 
         /**
          * This property represents a logger instance for logging messages. It is
@@ -124,6 +125,9 @@ interface IdentityTokenComponent {
                     restClient
                         .post()
                         .uri(tokenUri)
+                        .headers { if (properties.disableBodyLoggingWithPassword) it.set(RestTemplateConfigHeaders.LOG_REQUEST_BODY,"false") }
+                        .headers { if (properties.disableBodyLoggingWithCode) it.set(RestTemplateConfigHeaders.LOG_REQUEST_BODY,"false") }
+                        .headers { if (properties.disableBodyLoggingWithToken) it.set(RestTemplateConfigHeaders.LOG_RESPONSE_BODY,"false") }
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .setHeaders(
                             ip,
@@ -159,12 +163,12 @@ interface IdentityTokenComponent {
         ): RestClient.RequestBodySpec {
             val ipSpec =
                 this
-                    .header(properties.ipHeader, ip)
+                    .header(properties.ids.ipHeader, ip)
             return if (userAgent.isNullOrBlank()) {
                 ipSpec
             } else {
                 ipSpec
-                    .header(properties.userAgentHeader, userAgent)
+                    .header(properties.ids.userAgentHeader, userAgent)
             }
         }
     }

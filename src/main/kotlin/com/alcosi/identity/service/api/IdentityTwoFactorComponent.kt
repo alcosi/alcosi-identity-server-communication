@@ -14,6 +14,7 @@ import com.alcosi.identity.exception.api.*
 import com.alcosi.identity.service.error.parseExceptionAndExchange
 import com.alcosi.identity.service.token.IdentityClientTokenHolder
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.github.breninsul.rest.logging.RestTemplateConfigHeaders
 import org.springframework.web.client.RestClient
 import java.net.URLEncoder
 import java.nio.charset.Charset
@@ -117,27 +118,27 @@ interface IdentityTwoFactorComponent {
      */
     open class Implementation(
         protected open val tokenHolder: IdentityClientTokenHolder,
-        protected open val properties: IdentityServerProperties.Api,
+        protected open val properties: IdentityServerProperties,
         protected open val mappingHelper: ObjectMapper,
         protected open val restClient: RestClient,
     ) : IdentityTwoFactorComponent {
         /** Represents the URI for checking the status of two-factor authentication. */
-        protected open val checkUri = "${properties.uri}/account/2fa"
+        protected open val checkUri = "${properties.api.uri}/account/2fa"
 
         /**
          * The URI used to activate or deactivate two-factor authentication. It is
          * a protected open property.
          */
-        protected open val activateUri = "${properties.uri}/account/2fa/enabled/{enable}"
+        protected open val activateUri = "${properties.api.uri}/account/2fa/enabled/{enable}"
 
         /** Represents the URI for retrieving the two-factor authentication code. */
-        protected open val twoFaCodeUri = "${properties.uri}/user/{id}/2fa"
+        protected open val twoFaCodeUri = "${properties.api.uri}/user/{id}/2fa"
 
         /** Represents the URI for the authenticator endpoint. */
-        protected open val authenticatorUri = "${properties.uri}/account/authenticator"
+        protected open val authenticatorUri = "${properties.api.uri}/account/authenticator"
 
         /** The URI for generating recovery codes for two-factor authentication. */
-        protected open val recoveryAuthenticatorCodesUri = "${properties.uri}/account/2fa/generaterecoverycodes"
+        protected open val recoveryAuthenticatorCodesUri = "${properties.api.uri}/account/2fa/generaterecoverycodes"
 
         /**
          * This property represents a logger instance for logging messages. It is
@@ -160,7 +161,8 @@ interface IdentityTwoFactorComponent {
                     .get()
                     .uri(checkUri)
                     .header("Authorization", "Bearer $token")
-                    .header("x-api-version", properties.apiVersion)
+                    .header("x-api-version", properties.api.apiVersion)
+                    .headers { if (properties.disableBodyLoggingWithToken) it.set(RestTemplateConfigHeaders.LOG_REQUEST_HEADERS,"false") }
                     .parseExceptionAndExchange { _, clientResponse ->
                         val body = clientResponse.bodyTo(String::class.java)
                         if (clientResponse.statusCode.is2xxSuccessful) {
@@ -193,7 +195,8 @@ interface IdentityTwoFactorComponent {
                     .put()
                     .uri(activateUri.replace("{enable}", enable.toString()))
                     .header("Authorization", "Bearer $token")
-                    .header("x-api-version", properties.apiVersion)
+                    .header("x-api-version", properties.api.apiVersion)
+                    .headers { if (properties.disableBodyLoggingWithToken) it.set(RestTemplateConfigHeaders.LOG_REQUEST_HEADERS,"false") }
                     .parseExceptionAndExchange { _, clientResponse ->
                         val body = clientResponse.bodyTo(String::class.java)
                         if (clientResponse.statusCode.is2xxSuccessful) {
@@ -225,7 +228,8 @@ interface IdentityTwoFactorComponent {
                     .get()
                     .uri(twoFaCodeUri.replace("{id}", URLEncoder.encode(id, Charset.defaultCharset())))
                     .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
-                    .header("x-api-version", properties.apiVersion)
+                    .header("x-api-version", properties.api.apiVersion)
+                    .headers { if (properties.disableBodyLoggingWithCode) it.set(RestTemplateConfigHeaders.LOG_RESPONSE_BODY,"false") }
                     .parseExceptionAndExchange { _, clientResponse ->
                         val body = clientResponse.bodyTo(String::class.java)
                         if (clientResponse.statusCode.is2xxSuccessful) {
@@ -258,7 +262,9 @@ interface IdentityTwoFactorComponent {
                         .get()
                         .uri(authenticatorUri)
                         .header("Authorization", "Bearer $token")
-                        .header("x-api-version", properties.apiVersion)
+                        .header("x-api-version", properties.api.apiVersion)
+                        .headers { if (properties.disableBodyLoggingWithToken) it.set(RestTemplateConfigHeaders.LOG_REQUEST_HEADERS,"false") }
+                        .headers { if (properties.disableBodyLoggingWithCode) it.set(RestTemplateConfigHeaders.LOG_RESPONSE_BODY,"false") }
                         .parseExceptionAndExchange { _, clientResponse ->
                             val body = clientResponse.bodyTo(String::class.java)
                             if (clientResponse.statusCode.is2xxSuccessful) {
@@ -293,7 +299,9 @@ interface IdentityTwoFactorComponent {
                         .post()
                         .uri(authenticatorUri)
                         .header("Authorization", "Bearer $token")
-                        .header("x-api-version", properties.apiVersion)
+                        .header("x-api-version", properties.api.apiVersion)
+                        .headers { if (properties.disableBodyLoggingWithToken) it.set(RestTemplateConfigHeaders.LOG_REQUEST_HEADERS,"false") }
+                        .headers { if (properties.disableBodyLoggingWithCode) it.set(RestTemplateConfigHeaders.LOG_REQUEST_BODY,"false") }
                         .body(Identity2FaAuthenticatorAddCodeRq(code))
                         .parseExceptionAndExchange { _, clientResponse ->
                             val body = clientResponse.bodyTo(String::class.java)
@@ -325,7 +333,9 @@ interface IdentityTwoFactorComponent {
                         .post()
                         .uri(recoveryAuthenticatorCodesUri)
                         .header("Authorization", "Bearer $token")
-                        .header("x-api-version", properties.apiVersion)
+                        .header("x-api-version", properties.api.apiVersion)
+                        .headers { if (properties.disableBodyLoggingWithToken) it.set(RestTemplateConfigHeaders.LOG_REQUEST_HEADERS,"false") }
+                        .headers { if (properties.disableBodyLoggingWithCode) it.set(RestTemplateConfigHeaders.LOG_RESPONSE_BODY,"false") }
                         .parseExceptionAndExchange { _, clientResponse ->
                             val body = clientResponse.bodyTo(String::class.java)
                             if (clientResponse.statusCode.is2xxSuccessful) {
@@ -354,7 +364,8 @@ interface IdentityTwoFactorComponent {
                     .delete()
                     .uri(activateUri)
                     .header("Authorization", "Bearer $token")
-                    .header("x-api-version", properties.apiVersion)
+                    .header("x-api-version", properties.api.apiVersion)
+                    .headers { if (properties.disableBodyLoggingWithToken) it.set(RestTemplateConfigHeaders.LOG_REQUEST_HEADERS,"false") }
                     .parseExceptionAndExchange { _, clientResponse ->
                         val body = clientResponse.bodyTo(String::class.java)
                         if (clientResponse.statusCode.is2xxSuccessful) {

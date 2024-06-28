@@ -2,11 +2,13 @@ package com.alcosi.identity.service.api
 
 import com.alcosi.identity.config.IdentityServerProperties
 import com.alcosi.identity.dto.domain.IdentityDomainRegistration
+import com.alcosi.identity.dto.domain.toApi
 import com.alcosi.identity.exception.IdentityException
 import com.alcosi.identity.exception.api.IdentityRegistrationException
 import com.alcosi.identity.service.error.parseExceptionAndExchange
 import com.alcosi.identity.service.token.IdentityClientTokenHolder
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.github.breninsul.rest.logging.RestTemplateConfigHeaders
 import org.springframework.web.client.RestClient
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -34,12 +36,12 @@ interface IdentityRegistrationComponent {
      */
     open class Implementation(
         protected open val tokenHolder: IdentityClientTokenHolder,
-        protected open val properties: IdentityServerProperties.Api,
+        protected open val properties: IdentityServerProperties,
         protected open val mappingHelper: ObjectMapper,
         protected open val restClient: RestClient,
     ) : IdentityRegistrationComponent {
         /** The URI for registering a user. */
-        protected open val uri = "${properties.uri}/user/register"
+        protected open val uri = "${properties.api.uri}/user/register"
 
         /**
          * This property represents a logger instance for logging messages. It is
@@ -60,8 +62,9 @@ interface IdentityRegistrationComponent {
                     .post()
                     .uri(uri)
                     .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
-                    .header("x-api-version", properties.apiVersion)
-                    .body(rq)
+                    .header("x-api-version", properties.api.apiVersion)
+                    .headers { if (properties.disableBodyLoggingWithPassword) it.set(RestTemplateConfigHeaders.LOG_REQUEST_BODY,"false") }
+                    .body(rq.toApi())
                     .parseExceptionAndExchange { _, clientResponse ->
                         if (clientResponse.statusCode.is2xxSuccessful) {
                             return@parseExceptionAndExchange true

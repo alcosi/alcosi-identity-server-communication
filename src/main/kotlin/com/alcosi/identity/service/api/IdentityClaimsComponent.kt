@@ -38,7 +38,7 @@ interface IdentityClaimsComponent {
 
     open class Implementation(
         protected open val tokenHolder: IdentityClientTokenHolder,
-        protected open val properties: IdentityServerProperties.Api,
+        protected open val properties: IdentityServerProperties,
         protected open val mappingHelper: ObjectMapper,
         protected open val restClient: RestClient,
     ) : IdentityClaimsComponent {
@@ -47,7 +47,7 @@ interface IdentityClaimsComponent {
          * to change a claim for a user. It is a string that is constructed
          * by concatenating the apiUri from properties with the path
          */
-        protected open val uri = "${properties.uri}/user/{id}/claim"
+        protected open val uri = "${properties.api.uri}/user/{id}/claim"
 
         /**
          * This property represents a logger instance for logging messages. It is
@@ -83,7 +83,7 @@ interface IdentityClaimsComponent {
                     .put()
                     .uri(uri.replace("{id}", URLEncoder.encode(id, Charset.defaultCharset())))
                     .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
-                    .header("x-api-version", properties.apiVersion)
+                    .header("x-api-version", properties.api.apiVersion)
                     .body(rq)
                     .exchange { _, clientResponse ->
                         if (clientResponse.statusCode.is2xxSuccessful) {

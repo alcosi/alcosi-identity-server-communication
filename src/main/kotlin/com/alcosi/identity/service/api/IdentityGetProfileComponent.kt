@@ -30,11 +30,11 @@ interface IdentityGetProfileComponent {
 
     open class Implementation(
         protected open val holder: IdentityClientTokenHolder,
-        protected open val properties: IdentityServerProperties.Api,
+        protected open val properties: IdentityServerProperties,
         protected open val mappingHelper: ObjectMapper,
         protected open val webClient: RestClient,
     ) : IdentityGetProfileComponent {
-        protected open val getUserInfoUri = "${properties.uri}/user/{id}"
+        protected open val getUserInfoUri = "${properties.api.uri}/user/{id}"
 
         /**
          * This property represents a logger instance for logging messages. It is
@@ -55,7 +55,7 @@ interface IdentityGetProfileComponent {
                     .get()
                     .uri(getUserInfoUri.replace("{id}", URLEncoder.encode(id, Charset.defaultCharset())))
                     .header("Authorization", "Bearer ${holder.getAccessToken()}")
-                    .header("x-api-version", properties.apiVersion)
+                    .header("x-api-version", properties.api.apiVersion)
                     .parseExceptionAndExchange { _, clientResponse ->
                         val body = clientResponse.bodyTo(String::class.java)
                         if (clientResponse.statusCode.is2xxSuccessful) {

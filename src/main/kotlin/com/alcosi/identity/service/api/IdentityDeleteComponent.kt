@@ -37,7 +37,7 @@ interface IdentityDeleteComponent {
      */
     open class Implementation(
         protected open val tokenHolder: IdentityClientTokenHolder,
-        protected open val properties: IdentityServerProperties.Api,
+        protected open val properties: IdentityServerProperties,
         protected open val mappingHelper: ObjectMapper,
         protected open val restClient: RestClient,
     ) : IdentityDeleteComponent {
@@ -50,7 +50,7 @@ interface IdentityDeleteComponent {
          * The {id} path segment is replaced with the provided user ID.
          * The {isPermanent} query parameter is replaced with the provided boolean value.
          */
-        protected open val uri = "${properties.uri}/user/{id}?isPermanent={isPermanent}"
+        protected open val uri = "${properties.api.uri}/user/{id}?isPermanent={isPermanent}"
 
         /**
          * This property represents a logger instance for logging messages. It is
@@ -71,7 +71,7 @@ interface IdentityDeleteComponent {
                     .delete()
                     .uri(buildUri(id, isPermanent))
                     .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
-                    .header("x-api-version", properties.apiVersion)
+                    .header("x-api-version", properties.api.apiVersion)
                     .parseExceptionAndExchange { _, clientResponse ->
                         if (clientResponse.statusCode.is2xxSuccessful) {
                             return@parseExceptionAndExchange

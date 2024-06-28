@@ -10,6 +10,7 @@ import com.alcosi.identity.exception.api.IdentityResetPasswordResetCodeException
 import com.alcosi.identity.service.error.parseExceptionAndExchange
 import com.alcosi.identity.service.token.IdentityClientTokenHolder
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.github.breninsul.rest.logging.RestTemplateConfigHeaders
 import org.springframework.web.client.RestClient
 import java.net.URLEncoder
 import java.nio.charset.Charset
@@ -60,15 +61,15 @@ interface IdentityResetPasswordComponent {
      */
     open class Implementation(
         protected open val tokenHolder: IdentityClientTokenHolder,
-        protected open val properties: IdentityServerProperties.Api,
+        protected open val properties: IdentityServerProperties,
         protected open val mappingHelper: ObjectMapper,
         protected open val restClient: RestClient,
     ) : IdentityResetPasswordComponent {
         /** The URI used for sending a password reset request. */
-        protected open val uriSend = "${properties.uri}/user/{emailOrPhoneOrId}/password/forgot"
+        protected open val uriSend = "${properties.api.uri}/user/{emailOrPhoneOrId}/password/forgot"
 
         /** The URI used for resetting a user's password. */
-        protected open val uriReset = "${properties.uri}/user/{emailOrPhoneOrId}/password/reset"
+        protected open val uriReset = "${properties.api.uri}/user/{emailOrPhoneOrId}/password/reset"
 
         /**
          * This property represents a logger instance for logging messages. It is
@@ -89,7 +90,8 @@ interface IdentityResetPasswordComponent {
                     .get()
                     .uri(uriSend.replace("{emailOrPhoneOrId}", URLEncoder.encode(id, Charset.defaultCharset())))
                     .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
-                    .header("x-api-version", properties.apiVersion)
+                    .header("x-api-version", properties.api.apiVersion)
+                    .headers { if (properties.disableBodyLoggingWithCode) it.set(RestTemplateConfigHeaders.LOG_RESPONSE_BODY,"false") }
                     .exchange { _, clientResponse ->
                         val body = clientResponse.bodyTo(String::class.java)
                         if (clientResponse.statusCode.is2xxSuccessful) {
@@ -124,7 +126,9 @@ interface IdentityResetPasswordComponent {
                     .post()
                     .uri(uriReset.replace("{emailOrPhoneOrId}", URLEncoder.encode(id, Charset.defaultCharset())))
                     .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
-                    .header("x-api-version", properties.apiVersion)
+                    .header("x-api-version", properties.api.apiVersion)
+                    .headers { if (properties.disableBodyLoggingWithCode) it.set(RestTemplateConfigHeaders.LOG_REQUEST_BODY,"false") }
+                    .headers { if (properties.disableBodyLoggingWithPassword) it.set(RestTemplateConfigHeaders.LOG_REQUEST_BODY,"false") }
                     .body(IdentityResetCode(code, token, password))
                     .parseExceptionAndExchange { _, clientResponse ->
                         val body = clientResponse.bodyTo(String::class.java)

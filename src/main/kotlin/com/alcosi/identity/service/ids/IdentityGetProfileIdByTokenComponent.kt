@@ -8,6 +8,7 @@ import com.alcosi.identity.exception.IdentityException
 import com.alcosi.identity.exception.ids.IdentityExpiredOrInvalidTokenException
 import com.alcosi.identity.exception.ids.IdentityGetAccountIdByTokenException
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.github.breninsul.rest.logging.RestTemplateConfigHeaders
 import org.springframework.web.client.RestClient
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -46,7 +47,7 @@ interface IdentityGetProfileIdByTokenComponent:IdentityProfileIdByTokenProvider 
      */
     open class Implementation(
         protected open val mappingHelper: ObjectMapper,
-        protected open val properties: IdentityServerProperties.Ids,
+        protected open val properties: IdentityServerProperties,
         protected open val webClient: RestClient,
     ) : IdentityGetProfileIdByTokenComponent {
 
@@ -56,7 +57,7 @@ interface IdentityGetProfileIdByTokenComponent:IdentityProfileIdByTokenProvider 
          *
          * @property getUserInfoUri The URI for retrieving user information.
          */
-        protected open val getUserInfoUri = "${properties.uri}/connect/userinfo"
+        protected open val getUserInfoUri = "${properties.ids.uri}/connect/userinfo"
 
         /**
          * This property represents a logger instance for logging messages. It is
@@ -83,6 +84,7 @@ interface IdentityGetProfileIdByTokenComponent:IdentityProfileIdByTokenProvider 
                     .get()
                     .uri(getUserInfoUri)
                     .header("Authorization", "Bearer $token")
+                    .headers { if (properties.disableBodyLoggingWithToken) it.set(RestTemplateConfigHeaders.LOG_REQUEST_HEADERS,"false") }
                     .exchange { _, clientResponse ->
                         val body = clientResponse.bodyTo(String::class.java)
                         if (clientResponse.statusCode.is2xxSuccessful) {

@@ -30,13 +30,12 @@ interface IdentityRevokeTokenComponent {
 
     open class Implementation(
         protected open val tokenHolder: IdentityClientTokenHolder,
-        protected open val properties: IdentityServerProperties.Api,
-        protected open val idsProperties: IdentityServerProperties.Ids,
+        protected open val properties: IdentityServerProperties,
         protected open val mappingHelper: ObjectMapper,
         protected open val restClient: RestClient,
     ) : IdentityRevokeTokenComponent {
         /** The URI endpoint for revoking access on the identity server. */
-        protected open val revokeUri = "${properties.uri}/user/revokeaccess"
+        protected open val revokeUri = "${properties.api.uri}/user/revokeaccess"
 
         /**
          * This property represents a logger instance for logging messages. It is
@@ -89,14 +88,14 @@ interface IdentityRevokeTokenComponent {
         ): RestClient.RequestHeadersSpec<*> {
             val ipSpec =
                 this
-                    .header(idsProperties.ipHeader, ip)
+                    .header(properties.ids.ipHeader, ip)
                     .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
-                    .header("x-api-version", properties.apiVersion)
+                    .header("x-api-version", properties.api.apiVersion)
             return if (userAgent.isNullOrBlank()) {
                 ipSpec
             } else {
                 ipSpec
-                    .header(idsProperties.userAgentHeader, userAgent)
+                    .header(properties.ids.userAgentHeader, userAgent)
             }
         }
     }
