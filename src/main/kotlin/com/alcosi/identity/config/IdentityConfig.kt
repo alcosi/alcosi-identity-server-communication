@@ -7,7 +7,7 @@ import com.alcosi.identity.service.ids.IdentityTokenComponent
 import com.alcosi.identity.service.token.IdentityClientTokenHolder
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import io.github.breninsul.rest.logging.RestTemplateLoggingInterceptor
+import io.github.breninsul.rest.logging.RestTemplateLoggerConfiguration
 import io.github.breninsul.synchronizationstarter.service.SynchronizationService
 import io.github.breninsul.synchronizationstarter.service.local.LocalClearDecorator
 import io.github.breninsul.synchronizationstarter.service.local.LocalSynchronizationService
@@ -37,7 +37,7 @@ open class IdentityConfig {
         return RestClient
             .builder()
             .requestFactory(factory)
-            .requestInterceptor(RestTemplateLoggingInterceptor(properties.logging))
+            .requestInterceptor(RestTemplateLoggerConfiguration().registerRestTemplateLoggingInterceptor(properties.logging))
             .build()
     }
 
