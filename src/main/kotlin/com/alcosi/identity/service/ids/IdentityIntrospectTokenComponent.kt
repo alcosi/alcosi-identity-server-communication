@@ -8,6 +8,7 @@ import com.alcosi.identity.exception.IdentityException
 import com.alcosi.identity.exception.ids.IdentityExpiredTokenException
 import com.alcosi.identity.exception.ids.IdentityIntrospectTokenException
 import com.alcosi.identity.exception.ids.IdentityInvalidTokenException
+import com.alcosi.identity.service.error.parseExceptionAndExchange
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.breninsul.rest.logging.RestTemplateConfigHeaders
 import org.apache.commons.codec.binary.Base64
@@ -86,7 +87,7 @@ interface IdentityIntrospectTokenComponent : IdentityProfileIdByTokenProvider {
                     .header("Authorization", "Basic ${getBasicAuth()}")
                     .headers { if (properties.disableBodyLoggingWithToken) it.set(RestTemplateConfigHeaders.LOG_REQUEST_BODY,"false") }
                     .body(formData)
-                    .exchange { _, clientResponse ->
+                    .parseExceptionAndExchange { _, clientResponse ->
                         val body = clientResponse.bodyTo(String::class.java)
                         if (clientResponse.statusCode.value() == 401 || clientResponse.statusCode.value() == 400) {
                             throw IdentityInvalidTokenException(clientResponse.statusCode.value(), body)
@@ -95,7 +96,7 @@ interface IdentityIntrospectTokenComponent : IdentityProfileIdByTokenProvider {
                             if (account?.active != true || account.sub.isNullOrBlank()) {
                                 throw IdentityExpiredTokenException(clientResponse.statusCode.value(), body)
                             }
-                            return@exchange account.toDomain()
+                            return@parseExceptionAndExchange account.toDomain()
                         } else {
                             throw IdentityIntrospectTokenException(clientResponse.statusCode.value(), body)
                         }

@@ -5,6 +5,7 @@ import com.alcosi.identity.dto.api.IdentityToken
 import com.alcosi.identity.dto.domain.IdentityDomainToken
 import com.alcosi.identity.exception.IdentityException
 import com.alcosi.identity.exception.ids.IdentityUnknownTokenException
+import com.alcosi.identity.service.error.parseExceptionAndExchange
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.breninsul.rest.logging.RestTemplateConfigHeaders
 import org.springframework.http.MediaType
@@ -135,7 +136,7 @@ interface IdentityTokenComponent {
                         )
                 return requestSpec
                     .body(formData)
-                    .exchange { _, clientResponse ->
+                    .parseExceptionAndExchange { _, clientResponse ->
                         val rsString = clientResponse.bodyTo(String::class.java)
                         if (clientResponse.statusCode.isError || rsString.isNullOrBlank()) {
                             throw IdentityUnknownTokenException(clientResponse.statusCode.value(), rsString)
