@@ -11,9 +11,9 @@ import com.alcosi.identity.service.error.parseExceptionAndExchange
 import com.alcosi.identity.service.token.IdentityClientTokenHolder
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.web.client.RestClient
-import java.nio.charset.Charset
 import java.util.logging.Level
 import java.util.logging.Logger
+
 
 /**
  * The IdentityGetProfileComponent interface represents a component to retrieve the profile of a user.
@@ -53,7 +53,7 @@ interface IdentityGetProfileComponent {
             try {
                 return webClient
                     .get()
-                    .uri(getUserInfoUri.replace("{id}", URLPreparation.encode(id, Charset.defaultCharset())))
+                    .uri(getUserInfoUri, mapOf<String,String>("id" to id))
                     .header("Authorization", "Bearer ${holder.getAccessToken()}")
                     .header("x-api-version", properties.api.apiVersion)
                     .parseExceptionAndExchange { _, clientResponse ->

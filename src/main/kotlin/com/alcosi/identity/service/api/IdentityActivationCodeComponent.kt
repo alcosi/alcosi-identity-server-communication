@@ -84,7 +84,7 @@ interface IdentityActivationCodeComponent {
             try {
                 return restClient
                     .get()
-                    .uri(uri.replace("{emailOrPhoneOrId}", URLPreparation.encode(id, Charset.defaultCharset())))
+                    .uri(uri, mapOf<String,String>("emailOrPhoneOrId" to id))
                     .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
                     .header("x-api-version", properties.api.apiVersion)
                     .headers { if (properties.disableBodyLoggingWithCode) it.set(RestTemplateConfigHeaders.LOG_RESPONSE_BODY,"false") }
@@ -120,7 +120,7 @@ interface IdentityActivationCodeComponent {
                 val response =
                     restClient
                         .post()
-                        .uri(uri.replace("{emailOrPhoneOrId}", URLPreparation.encode(id, Charset.defaultCharset())))
+                        .uri(uri, mapOf<String,String>("emailOrPhoneOrId" to id))
                         .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
                         .header("x-api-version", properties.api.apiVersion)
                         .headers { if (properties.disableBodyLoggingWithCode) it.set(RestTemplateConfigHeaders.LOG_REQUEST_BODY,"false") }

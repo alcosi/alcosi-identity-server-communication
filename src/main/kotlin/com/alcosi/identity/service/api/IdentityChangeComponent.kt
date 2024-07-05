@@ -108,7 +108,7 @@ interface IdentityChangeComponent {
             try {
                 return restClient
                     .put()
-                    .uri(uri.replace("{id}", URLPreparation.encode(id, Charset.defaultCharset())))
+                    .uri(uri,mapOf<String,String>("id" to id))
                     .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
                     .header("x-api-version", properties.api.apiVersion)
                     .body(rq.toApi())

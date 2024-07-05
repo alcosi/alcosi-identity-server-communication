@@ -69,7 +69,7 @@ interface IdentityDeleteComponent {
             try {
                 restClient
                     .delete()
-                    .uri(buildUri(id, isPermanent))
+                    .uri(uri,mapOf<String,String>("id" to id.toString(),"isPermanent" to isPermanent.toString()))
                     .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
                     .header("x-api-version", properties.api.apiVersion)
                     .parseExceptionAndExchange { _, clientResponse ->
@@ -84,22 +84,6 @@ interface IdentityDeleteComponent {
                 logger.log(Level.SEVERE, "Exception Identity server:", t)
                 throw if (t is IdentityException) t else IdentityDeleteException(exception = t)
             }
-        }
-
-        /**
-         * Builds the URI for the delete operation.
-         *
-         * @param id The ID of the entity to delete.
-         * @param isPermanent Specifies whether the deletion should be permanent. Default value is true.
-         * @return The URI string for the delete operation.
-         */
-        protected open fun buildUri(
-            id: UUID,
-            isPermanent: Boolean,
-        ): String {
-            return uri
-                .run { replace("{id}", URLPreparation.encode(id.toString(), Charset.defaultCharset())) }
-                .run { replace("{isPermanent}", URLPreparation.encode(isPermanent.toString(), Charset.defaultCharset())) }
         }
     }
 }
