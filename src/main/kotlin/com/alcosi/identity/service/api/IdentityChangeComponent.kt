@@ -1,7 +1,7 @@
 package com.alcosi.identity.service.api
 
 import com.alcosi.identity.config.IdentityServerProperties
-import com.alcosi.identity.dto.api.IdentityChangeAccountRq
+import com.alcosi.identity.config.URLPreparation
 import com.alcosi.identity.dto.domain.IdentityDomainChangeAccount
 import com.alcosi.identity.exception.api.IdentityChangeAccountException
 import com.alcosi.identity.exception.IdentityException
@@ -9,7 +9,7 @@ import com.alcosi.identity.service.error.parseExceptionAndExchange
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.alcosi.identity.service.token.IdentityClientTokenHolder
 import org.springframework.web.client.RestClient
-import java.net.URLEncoder
+
 import java.nio.charset.Charset
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -108,7 +108,7 @@ interface IdentityChangeComponent {
             try {
                 return restClient
                     .put()
-                    .uri(uri.replace("{id}", URLEncoder.encode(id, Charset.defaultCharset())))
+                    .uri(uri.replace("{id}", URLPreparation.encode(id, Charset.defaultCharset())))
                     .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
                     .header("x-api-version", properties.api.apiVersion)
                     .body(rq.toApi())

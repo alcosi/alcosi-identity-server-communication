@@ -7,7 +7,7 @@ import com.alcosi.identity.service.error.parseExceptionAndExchange
 import com.alcosi.identity.service.token.IdentityClientTokenHolder
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.web.client.RestClient
-import java.net.URLEncoder
+import com.alcosi.identity.config.URLPreparation
 import java.nio.charset.Charset
 import java.util.*
 import java.util.logging.Level
@@ -98,8 +98,8 @@ interface IdentityDeleteComponent {
             isPermanent: Boolean,
         ): String {
             return uri
-                .run { replace("{id}", URLEncoder.encode(id.toString(), Charset.defaultCharset())) }
-                .run { replace("{isPermanent}", URLEncoder.encode(isPermanent.toString(), Charset.defaultCharset())) }
+                .run { replace("{id}", URLPreparation.encode(id.toString(), Charset.defaultCharset())) }
+                .run { replace("{isPermanent}", URLPreparation.encode(isPermanent.toString(), Charset.defaultCharset())) }
         }
     }
 }

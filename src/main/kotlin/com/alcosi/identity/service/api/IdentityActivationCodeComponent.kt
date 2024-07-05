@@ -12,7 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.alcosi.identity.service.token.IdentityClientTokenHolder
 import io.github.breninsul.rest.logging.RestTemplateConfigHeaders
 import org.springframework.web.client.RestClient
-import java.net.URLEncoder
+import com.alcosi.identity.config.URLPreparation
 import java.nio.charset.Charset
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -84,7 +84,7 @@ interface IdentityActivationCodeComponent {
             try {
                 return restClient
                     .get()
-                    .uri(uri.replace("{emailOrPhoneOrId}", URLEncoder.encode(id, Charset.defaultCharset())))
+                    .uri(uri.replace("{emailOrPhoneOrId}", URLPreparation.encode(id, Charset.defaultCharset())))
                     .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
                     .header("x-api-version", properties.api.apiVersion)
                     .headers { if (properties.disableBodyLoggingWithCode) it.set(RestTemplateConfigHeaders.LOG_RESPONSE_BODY,"false") }
@@ -120,7 +120,7 @@ interface IdentityActivationCodeComponent {
                 val response =
                     restClient
                         .post()
-                        .uri(uri.replace("{emailOrPhoneOrId}", URLEncoder.encode(id, Charset.defaultCharset())))
+                        .uri(uri.replace("{emailOrPhoneOrId}", URLPreparation.encode(id, Charset.defaultCharset())))
                         .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
                         .header("x-api-version", properties.api.apiVersion)
                         .headers { if (properties.disableBodyLoggingWithCode) it.set(RestTemplateConfigHeaders.LOG_REQUEST_BODY,"false") }

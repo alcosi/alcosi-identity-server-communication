@@ -1,6 +1,7 @@
 package com.alcosi.identity.service.api
 
 import com.alcosi.identity.config.IdentityServerProperties
+import com.alcosi.identity.config.URLPreparation
 import com.alcosi.identity.dto.api.IdentityAccount
 import com.alcosi.identity.dto.domain.IdentityDomainAccount
 import com.alcosi.identity.dto.domain.toDomain
@@ -10,7 +11,6 @@ import com.alcosi.identity.service.error.parseExceptionAndExchange
 import com.alcosi.identity.service.token.IdentityClientTokenHolder
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.web.client.RestClient
-import java.net.URLEncoder
 import java.nio.charset.Charset
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -53,7 +53,7 @@ interface IdentityGetProfileComponent {
             try {
                 return webClient
                     .get()
-                    .uri(getUserInfoUri.replace("{id}", URLEncoder.encode(id, Charset.defaultCharset())))
+                    .uri(getUserInfoUri.replace("{id}", URLPreparation.encode(id, Charset.defaultCharset())))
                     .header("Authorization", "Bearer ${holder.getAccessToken()}")
                     .header("x-api-version", properties.api.apiVersion)
                     .parseExceptionAndExchange { _, clientResponse ->

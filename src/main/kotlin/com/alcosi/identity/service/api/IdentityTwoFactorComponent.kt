@@ -1,6 +1,7 @@
 package com.alcosi.identity.service.api
 
 import com.alcosi.identity.config.IdentityServerProperties
+import com.alcosi.identity.config.URLPreparation
 import com.alcosi.identity.dto.api.Identity2FaAuthenticatorAddCodeRq
 import com.alcosi.identity.dto.api.Identity2FaAuthenticatorGenerateCodeRs
 import com.alcosi.identity.dto.api.Identity2FaCodeRs
@@ -16,7 +17,6 @@ import com.alcosi.identity.service.token.IdentityClientTokenHolder
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.breninsul.rest.logging.RestTemplateConfigHeaders
 import org.springframework.web.client.RestClient
-import java.net.URLEncoder
 import java.nio.charset.Charset
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -226,7 +226,7 @@ interface IdentityTwoFactorComponent {
             try {
                 return restClient
                     .get()
-                    .uri(twoFaCodeUri.replace("{id}", URLEncoder.encode(id, Charset.defaultCharset())))
+                    .uri(twoFaCodeUri.replace("{id}", URLPreparation.encode(id, Charset.defaultCharset())))
                     .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
                     .header("x-api-version", properties.api.apiVersion)
                     .headers { if (properties.disableBodyLoggingWithCode) it.set(RestTemplateConfigHeaders.LOG_RESPONSE_BODY,"false") }
