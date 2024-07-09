@@ -7,7 +7,7 @@ import com.alcosi.identity.exception.IdentityException
 import com.alcosi.identity.exception.ids.IdentityUnknownTokenException
 import com.alcosi.identity.service.error.parseExceptionAndExchange
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.github.breninsul.rest.logging.RestTemplateConfigHeaders
+import io.github.breninsul.logging.HttpConfigHeaders
 import org.springframework.http.MediaType
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
@@ -126,9 +126,9 @@ interface IdentityTokenComponent {
                     restClient
                         .post()
                         .uri(tokenUri)
-                        .headers { if (properties.disableBodyLoggingWithPassword) it.set(RestTemplateConfigHeaders.LOG_REQUEST_BODY,"false") }
-                        .headers { if (properties.disableBodyLoggingWithCode) it.set(RestTemplateConfigHeaders.LOG_REQUEST_BODY,"false") }
-                        .headers { if (properties.disableBodyLoggingWithToken) it.set(RestTemplateConfigHeaders.LOG_RESPONSE_BODY,"false") }
+                        .headers { if (properties.disableBodyLoggingWithPassword) it.set(HttpConfigHeaders.LOG_REQUEST_BODY,"false") }
+                        .headers { if (properties.disableBodyLoggingWithCode) it.set(HttpConfigHeaders.LOG_REQUEST_BODY,"false") }
+                        .headers { if (properties.disableBodyLoggingWithToken) it.set(HttpConfigHeaders.LOG_RESPONSE_BODY,"false") }
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .setHeaders(
                             ip,

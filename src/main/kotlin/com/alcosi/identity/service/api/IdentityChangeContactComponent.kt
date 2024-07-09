@@ -10,7 +10,7 @@ import com.alcosi.identity.exception.IdentityException
 import com.alcosi.identity.exception.api.IdentityChangeProfileContactsException
 import com.alcosi.identity.service.error.parseExceptionAndExchange
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.github.breninsul.rest.logging.RestTemplateConfigHeaders
+import io.github.breninsul.logging.HttpConfigHeaders
 import org.springframework.web.client.RestClient
 import java.net.URLEncoder
 import java.nio.charset.Charset
@@ -129,8 +129,8 @@ interface IdentityChangeContactComponent {
                         .uri(getCodeUri.replace("{type}", URLEncoder.encode(type.rqType.uriPath, Charset.defaultCharset())))
                         .header("Authorization", "Bearer $token")
                         .header("x-api-version", properties.api.apiVersion)
-                        .headers { if (properties.disableBodyLoggingWithToken) it.set(RestTemplateConfigHeaders.LOG_REQUEST_HEADERS,"false") }
-                        .headers { if (properties.disableBodyLoggingWithCode) it.set(RestTemplateConfigHeaders.LOG_RESPONSE_BODY,"false") }
+                        .headers { if (properties.disableBodyLoggingWithToken) it.set(HttpConfigHeaders.LOG_REQUEST_HEADERS,"false") }
+                        .headers { if (properties.disableBodyLoggingWithCode) it.set(HttpConfigHeaders.LOG_RESPONSE_BODY,"false") }
                         .body(rq)
                         .parseExceptionAndExchange { _, clientResponse ->
                             val body = clientResponse.bodyTo(String::class.java)
@@ -168,8 +168,8 @@ interface IdentityChangeContactComponent {
                     .uri(validateCodeUri)
                     .header("Authorization", "Bearer $token")
                     .header("x-api-version", properties.api.apiVersion)
-                    .headers { if (properties.disableBodyLoggingWithToken) it.set(RestTemplateConfigHeaders.LOG_REQUEST_HEADERS,"false") }
-                    .headers { if (properties.disableBodyLoggingWithCode) it.set(RestTemplateConfigHeaders.LOG_REQUEST_BODY,"false") }
+                    .headers { if (properties.disableBodyLoggingWithToken) it.set(HttpConfigHeaders.LOG_REQUEST_HEADERS,"false") }
+                    .headers { if (properties.disableBodyLoggingWithCode) it.set(HttpConfigHeaders.LOG_REQUEST_BODY,"false") }
                     .body(rq)
                     .parseExceptionAndExchange { _, clientResponse ->
                         if (clientResponse.statusCode.is2xxSuccessful) {

@@ -9,7 +9,7 @@ import com.alcosi.identity.exception.ids.IdentityExpiredOrInvalidTokenException
 import com.alcosi.identity.exception.ids.IdentityGetAccountIdByTokenException
 import com.alcosi.identity.service.error.parseExceptionAndExchange
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.github.breninsul.rest.logging.RestTemplateConfigHeaders
+import io.github.breninsul.logging.HttpConfigHeaders
 import org.springframework.web.client.RestClient
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -85,7 +85,7 @@ interface IdentityGetProfileIdByTokenComponent:IdentityProfileIdByTokenProvider 
                     .get()
                     .uri(getUserInfoUri)
                     .header("Authorization", "Bearer $token")
-                    .headers { if (properties.disableBodyLoggingWithToken) it.set(RestTemplateConfigHeaders.LOG_REQUEST_HEADERS,"false") }
+                    .headers { if (properties.disableBodyLoggingWithToken) it.set(HttpConfigHeaders.LOG_REQUEST_HEADERS,"false") }
                     .parseExceptionAndExchange { _, clientResponse ->
                         val body = clientResponse.bodyTo(String::class.java)
                         if (clientResponse.statusCode.is2xxSuccessful) {

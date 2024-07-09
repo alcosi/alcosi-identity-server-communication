@@ -8,7 +8,7 @@ import com.alcosi.identity.exception.api.IdentityRegistrationException
 import com.alcosi.identity.service.error.parseExceptionAndExchange
 import com.alcosi.identity.service.token.IdentityClientTokenHolder
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.github.breninsul.rest.logging.RestTemplateConfigHeaders
+import io.github.breninsul.logging.HttpConfigHeaders
 import org.springframework.web.client.RestClient
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -63,7 +63,7 @@ interface IdentityRegistrationComponent {
                     .uri(uri)
                     .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
                     .header("x-api-version", properties.api.apiVersion)
-                    .headers { if (properties.disableBodyLoggingWithPassword) it.set(RestTemplateConfigHeaders.LOG_REQUEST_BODY,"false") }
+                    .headers { if (properties.disableBodyLoggingWithPassword) it.set(HttpConfigHeaders.LOG_REQUEST_BODY,"false") }
                     .body(rq.toApi())
                     .parseExceptionAndExchange { _, clientResponse ->
                         if (clientResponse.statusCode.is2xxSuccessful) {

@@ -10,10 +10,8 @@ import com.alcosi.identity.exception.api.IdentityGetActivationCodeException
 import com.alcosi.identity.service.error.parseExceptionAndExchange
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.alcosi.identity.service.token.IdentityClientTokenHolder
-import io.github.breninsul.rest.logging.RestTemplateConfigHeaders
+import io.github.breninsul.logging.HttpConfigHeaders
 import org.springframework.web.client.RestClient
-import com.alcosi.identity.config.URLPreparation
-import java.nio.charset.Charset
 import java.util.logging.Level
 import java.util.logging.Logger
 
@@ -87,7 +85,7 @@ interface IdentityActivationCodeComponent {
                     .uri(uri, mapOf<String,String>("emailOrPhoneOrId" to id))
                     .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
                     .header("x-api-version", properties.api.apiVersion)
-                    .headers { if (properties.disableBodyLoggingWithCode) it.set(RestTemplateConfigHeaders.LOG_RESPONSE_BODY,"false") }
+                    .headers { if (properties.disableBodyLoggingWithCode) it.set(HttpConfigHeaders.LOG_RESPONSE_BODY,"false") }
                     .parseExceptionAndExchange { _, clientResponse ->
                         val body = clientResponse.bodyTo(String::class.java)
                         if (clientResponse.statusCode.is2xxSuccessful) {
@@ -123,7 +121,7 @@ interface IdentityActivationCodeComponent {
                         .uri(uri, mapOf<String,String>("emailOrPhoneOrId" to id))
                         .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
                         .header("x-api-version", properties.api.apiVersion)
-                        .headers { if (properties.disableBodyLoggingWithCode) it.set(RestTemplateConfigHeaders.LOG_REQUEST_BODY,"false") }
+                        .headers { if (properties.disableBodyLoggingWithCode) it.set(HttpConfigHeaders.LOG_REQUEST_BODY,"false") }
                         .body(IdentityActivationCode(code, token))
                         .exchange { _, clientResponse ->
                             val body = clientResponse.bodyTo(String::class.java)

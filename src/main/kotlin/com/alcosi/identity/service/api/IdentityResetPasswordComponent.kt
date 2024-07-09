@@ -10,7 +10,7 @@ import com.alcosi.identity.exception.api.IdentityResetPasswordResetCodeException
 import com.alcosi.identity.service.error.parseExceptionAndExchange
 import com.alcosi.identity.service.token.IdentityClientTokenHolder
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.github.breninsul.rest.logging.RestTemplateConfigHeaders
+import io.github.breninsul.logging.HttpConfigHeaders
 import org.springframework.web.client.RestClient
 import java.net.URLEncoder
 import java.nio.charset.Charset
@@ -91,7 +91,7 @@ interface IdentityResetPasswordComponent {
                     .uri(uriSend.replace("{emailOrPhoneOrId}", URLEncoder.encode(id, Charset.defaultCharset())))
                     .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
                     .header("x-api-version", properties.api.apiVersion)
-                    .headers { if (properties.disableBodyLoggingWithCode) it.set(RestTemplateConfigHeaders.LOG_RESPONSE_BODY,"false") }
+                    .headers { if (properties.disableBodyLoggingWithCode) it.set(HttpConfigHeaders.LOG_RESPONSE_BODY,"false") }
                     .exchange { _, clientResponse ->
                         val body = clientResponse.bodyTo(String::class.java)
                         if (clientResponse.statusCode.is2xxSuccessful) {
@@ -127,8 +127,8 @@ interface IdentityResetPasswordComponent {
                     .uri(uriReset.replace("{emailOrPhoneOrId}", URLEncoder.encode(id, Charset.defaultCharset())))
                     .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
                     .header("x-api-version", properties.api.apiVersion)
-                    .headers { if (properties.disableBodyLoggingWithCode) it.set(RestTemplateConfigHeaders.LOG_REQUEST_BODY,"false") }
-                    .headers { if (properties.disableBodyLoggingWithPassword) it.set(RestTemplateConfigHeaders.LOG_REQUEST_BODY,"false") }
+                    .headers { if (properties.disableBodyLoggingWithCode) it.set(HttpConfigHeaders.LOG_REQUEST_BODY,"false") }
+                    .headers { if (properties.disableBodyLoggingWithPassword) it.set(HttpConfigHeaders.LOG_REQUEST_BODY,"false") }
                     .body(IdentityResetCode(code, token, password))
                     .parseExceptionAndExchange { _, clientResponse ->
                         val body = clientResponse.bodyTo(String::class.java)
