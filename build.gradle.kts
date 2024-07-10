@@ -40,7 +40,7 @@ val javaVersion = JavaVersion.VERSION_21
 val env = "RELEASE"
 
 group = "com.alcosi"
-version = "1.19-$env"
+version = "1.20-$env"
 java.sourceCompatibility = javaVersion
 
 idea {
