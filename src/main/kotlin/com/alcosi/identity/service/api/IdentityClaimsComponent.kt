@@ -5,6 +5,7 @@ import com.alcosi.identity.dto.api.IdentityChangeClaimRq
 import com.alcosi.identity.dto.api.IdentityServerClaim
 import com.alcosi.identity.exception.IdentityException
 import com.alcosi.identity.exception.api.IdentityChangeClaimException
+import com.alcosi.identity.service.error.parseExceptionAndExchange
 import com.alcosi.identity.service.token.IdentityClientTokenHolder
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.web.client.RestClient
@@ -85,9 +86,9 @@ interface IdentityClaimsComponent {
                     .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
                     .header("x-api-version", properties.api.apiVersion)
                     .body(rq)
-                    .exchange { _, clientResponse ->
+                    .parseExceptionAndExchange() { _, clientResponse ->
                         if (clientResponse.statusCode.is2xxSuccessful) {
-                            return@exchange true
+                            return@parseExceptionAndExchange true
                         } else {
                             val body = clientResponse.bodyTo(String::class.java)
                             throw IdentityChangeClaimException(clientResponse.statusCode.value(), body)

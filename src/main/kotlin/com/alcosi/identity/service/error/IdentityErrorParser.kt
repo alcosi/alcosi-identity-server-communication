@@ -3,6 +3,7 @@ package com.alcosi.identity.service.error
 import com.alcosi.identity.exception.parser.api.*
 import com.alcosi.identity.exception.parser.ids.*
 import org.springframework.web.client.RestClient
+import org.springframework.web.client.RestClientException
 
 interface IdentityErrorParser {
     /**

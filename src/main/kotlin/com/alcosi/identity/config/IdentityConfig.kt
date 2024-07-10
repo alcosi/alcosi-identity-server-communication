@@ -11,13 +11,16 @@ import io.github.breninsul.rest.logging.RestTemplateLoggerConfiguration
 import io.github.breninsul.synchronizationstarter.service.SynchronizationService
 import io.github.breninsul.synchronizationstarter.service.local.LocalClearDecorator
 import io.github.breninsul.synchronizationstarter.service.local.LocalSynchronizationService
+import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.AutoConfiguration
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
+import org.springframework.boot.autoconfigure.web.client.RestClientBuilderConfigurer
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.http.client.BufferingClientHttpRequestFactory
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory
 import org.springframework.http.client.SimpleClientHttpRequestFactory
 import org.springframework.web.client.RestClient
 import java.time.Duration
@@ -29,16 +32,20 @@ open class IdentityConfig {
     //utils
     @Bean("identityServerRestClient")
     @ConditionalOnMissingBean(name = ["identityServerRestClient"])
-    open fun identityServerRestClient(properties: IdentityServerProperties): RestClient {
-        val simpleClientHttpRequestFactory = SimpleClientHttpRequestFactory()
+    open fun identityServerRestClient(properties: IdentityServerProperties, configurer: ObjectProvider<RestClientBuilderConfigurer>, ): RestClient {
+        val simpleClientHttpRequestFactory = HttpComponentsClientHttpRequestFactory()
         simpleClientHttpRequestFactory.setConnectTimeout(properties.connectTimeout.toMillis().toInt())
-        simpleClientHttpRequestFactory.setReadTimeout(properties.readTimeout.toMillis().toInt())
+        simpleClientHttpRequestFactory.setConnectionRequestTimeout(properties.readTimeout.toMillis().toInt())
         val factory = BufferingClientHttpRequestFactory(simpleClientHttpRequestFactory)
-        return RestClient
-            .builder()
-            .requestFactory(factory)
-            .requestInterceptor(RestTemplateLoggerConfiguration().registerRestTemplateLoggingInterceptor(properties.logging))
-            .build()
+        val builder= RestClient.builder()
+
+        builder.requestFactory(factory)
+        builder.requestInterceptor(RestTemplateLoggerConfiguration().registerRestTemplateLoggingInterceptor(properties.logging))
+
+        val configurers = configurer.toList()
+        configurers.forEach { it.configure(builder) }
+        val client = builder.build()
+        return client
     }
 
     @Bean("identityServerObjectMapper")

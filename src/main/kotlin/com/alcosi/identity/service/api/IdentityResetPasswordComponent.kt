@@ -92,10 +92,10 @@ interface IdentityResetPasswordComponent {
                     .header("Authorization", "Bearer ${tokenHolder.getAccessToken()}")
                     .header("x-api-version", properties.api.apiVersion)
                     .headers { if (properties.disableBodyLoggingWithCode) it.set(HttpConfigHeaders.LOG_RESPONSE_BODY,"false") }
-                    .exchange { _, clientResponse ->
+                    .parseExceptionAndExchange { _, clientResponse ->
                         val body = clientResponse.bodyTo(String::class.java)
                         if (clientResponse.statusCode.is2xxSuccessful) {
-                            return@exchange mappingHelper.readValue(body, IdentityResetCode::class.java)!!
+                            return@parseExceptionAndExchange mappingHelper.readValue(body, IdentityResetCode::class.java)!!
                         } else {
                             throw IdentityResetPasswordGetCodeException(clientResponse.statusCode.value(), body)
                         }

@@ -123,10 +123,10 @@ interface IdentityActivationCodeComponent {
                         .header("x-api-version", properties.api.apiVersion)
                         .headers { if (properties.disableBodyLoggingWithCode) it.set(HttpConfigHeaders.LOG_REQUEST_BODY,"false") }
                         .body(IdentityActivationCode(code, token))
-                        .exchange { _, clientResponse ->
+                        .parseExceptionAndExchange { _, clientResponse ->
                             val body = clientResponse.bodyTo(String::class.java)
                             if (clientResponse.statusCode.is2xxSuccessful) {
-                                return@exchange
+                                return@parseExceptionAndExchange
                             } else {
                                 throw IdentityApproveActivationCodeException(clientResponse.statusCode.value(), body)
                             }
