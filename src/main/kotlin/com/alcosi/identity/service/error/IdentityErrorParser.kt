@@ -115,14 +115,14 @@ interface IdentityErrorParser {
          * @property apiList The list of API error configurations.
          */
         open val apiList = mutableListOf(
-            ErrorConfig(RegexMessageErrorVoter(".*-2147483379.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityPasswordIsNotStrongEnoughParserException(msg, status) }),
-            ErrorConfig(RegexMessageErrorVoter(".*-2147483376.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityProfileNotExistOnIdentityParserException(msg, status) }),
-            ErrorConfig(RegexMessageErrorVoter(listOf(".*-2147483375.*".toRegex(), ".*-2147483372.*".toRegex())), MessageErrorSupplier { msg, status -> IdentityProfileIsAlreadyActivatedParserException(msg, status) }),
-            ErrorConfig(RegexMessageErrorVoter(".*-2147483374.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityWrongActivationCodeParserException(msg, status) }),
-            ErrorConfig(RegexMessageErrorVoter(listOf(".*-2147483371.*".toRegex(), ".*-2147483368.*".toRegex())), MessageErrorSupplier { msg, status -> IdentityProfileIsAlreadyRegisteredParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(".*Password_Validation_Failed.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityPasswordIsNotStrongEnoughParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(".*User_Not_Found.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityProfileNotExistOnIdentityParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(listOf( ".*Account_Already_Activated.*".toRegex())), MessageErrorSupplier { msg, status -> IdentityProfileIsAlreadyActivatedParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(".*-User_Activation_Fail: Invalid token.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityWrongActivationCodeParserException(msg, status) }),
+//            ErrorConfig(RegexMessageErrorVoter(listOf(".*-2147483371.*".toRegex(), ".*-2147483368.*".toRegex())), MessageErrorSupplier { msg, status -> IdentityProfileIsAlreadyRegisteredParserException(msg, status) }),
             ErrorConfig(RegexMessageErrorVoter(".*-2147483366.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityInvalidAuthentificatorCodeParserException(msg, status) }),
-            ErrorConfig(RegexMessageErrorVoter(".*-2147483363.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityProfileIsAlreadyRegisteredAndActivatedParserException(msg, status) }),
-            ErrorConfig(RegexMessageErrorVoter(".*-2147483362.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityProfileIsAlreadyRegisteredButNotActivatedParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(".*User_Already_Binded_Activated.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityProfileIsAlreadyRegisteredAndActivatedParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(".*-User_Already_Binded_Not_Activated.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityProfileIsAlreadyRegisteredButNotActivatedParserException(msg, status) }),
         )
 
         /**
