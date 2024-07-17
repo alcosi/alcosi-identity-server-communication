@@ -3,7 +3,6 @@ package com.alcosi.identity.service.error
 import com.alcosi.identity.exception.parser.api.*
 import com.alcosi.identity.exception.parser.ids.*
 import org.springframework.web.client.RestClient
-import org.springframework.web.client.RestClientException
 
 interface IdentityErrorParser {
     /**
@@ -118,12 +117,14 @@ interface IdentityErrorParser {
             ErrorConfig(RegexMessageErrorVoter(".*Password_Validation_Failed.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityPasswordIsNotStrongEnoughParserException(msg, status) }),
             ErrorConfig(RegexMessageErrorVoter(".*User_Not_Found.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityProfileNotExistOnIdentityParserException(msg, status) }),
             ErrorConfig(RegexMessageErrorVoter(listOf( ".*Account_Already_Activated.*".toRegex())), MessageErrorSupplier { msg, status -> IdentityProfileIsAlreadyActivatedParserException(msg, status) }),
-            ErrorConfig(RegexMessageErrorVoter(".*User_Activation_Fail: Invalid token.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityWrongActivationCodeParserException(msg, status) }),
-//            ErrorConfig(RegexMessageErrorVoter(listOf(".*-2147483371.*".toRegex(), ".*-2147483368.*".toRegex())), MessageErrorSupplier { msg, status -> IdentityProfileIsAlreadyRegisteredParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(".*User_Activation_Fail: Invalid token.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityInvalidActivationCodeParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(".*Reset_Password_Fail: Invalid token.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityInvalidResetPasswordCodeParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(".*Update_Profile_Fail: Invalid token.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityInvalidChangeContactsCodeParserException(msg, status) }),
             ErrorConfig(RegexMessageErrorVoter(".*Authenticator_Fail.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityInvalidAuthentificatorCodeParserException(msg, status) }),
             ErrorConfig(RegexMessageErrorVoter(".*User_Already_Binded_Activated.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityProfileIsAlreadyRegisteredAndActivatedParserException(msg, status) }),
             ErrorConfig(RegexMessageErrorVoter(".*User_Already_Binded_Not_Activated.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityProfileIsAlreadyRegisteredButNotActivatedParserException(msg, status) }),
-        )
+            ErrorConfig(RegexMessageErrorVoter(listOf(".*User_Already_Binded:.*".toRegex(), ".*User_Already_Binded .*".toRegex(), ".*User_Already_Binded".toRegex())), MessageErrorSupplier { msg, status -> IdentityProfileIsAlreadyRegisteredParserException(msg, status) }),
+            )
 
         /**
          * Process the exception related to the IDS.
