@@ -1,7 +1,11 @@
 package com.alcosi.identity.service.error
 
+import java.util.logging.Level
+import java.util.logging.Logger
+
 /**
- * Represents a message error voter that uses regular expressions to match error messages.
+ * Represents a message error voter that uses regular expressions to match
+ * error messages.
  *
  * @param regexes The list of regular expressions to match error messages.
  * @param options The set of regular expression options to apply.
@@ -12,8 +16,10 @@ open class RegexMessageErrorVoter(regexes: List<Regex>, options: Set<RegexOption
     /**
      * Represents a list of regular expressions with options.
      *
-     * This variable is used to store a list of regular expressions with options. If the options are empty, the variable
-     * stores the original list of regular expressions. Otherwise, it maps each regular expression with the provided options.
+     * This variable is used to store a list of regular expressions with
+     * options. If the options are empty, the variable stores the original list
+     * of regular expressions. Otherwise, it maps each regular expression with
+     * the provided options.
      *
      * @property regexesWithOpts The list of regular expressions with options.
      */
@@ -22,13 +28,17 @@ open class RegexMessageErrorVoter(regexes: List<Regex>, options: Set<RegexOption
     /**
      * Represents the result of a null message in the voting process.
      *
-     * The `nullResult` property is a boolean value that determines the result of the vote when the message is null.
-     * If `nullResult` is true, it means that a null message should be considered as a valid vote. If `nullResult` is false,
-     * it means that a null message should be considered as an invalid vote. The default value is false.
+     * The `nullResult` property is a boolean value that determines the
+     * result of the vote when the message is null. If `nullResult` is true,
+     * it means that a null message should be considered as a valid vote. If
+     * `nullResult` is false, it means that a null message should be considered
+     * as an invalid vote. The default value is false.
      *
-     * This property is used in the `vote` function to determine the final vote result based on the message and status code.
+     * This property is used in the `vote` function to determine the final vote
+     * result based on the message and status code.
      *
-     * @property nullResult The boolean value indicating the result of a null message in the voting process.
+     * @property nullResult The boolean value indicating the result of a null
+     *    message in the voting process.
      */
     protected open val nullResult: Boolean = false
 
@@ -43,8 +53,18 @@ open class RegexMessageErrorVoter(regexes: List<Regex>, options: Set<RegexOption
         if (message == null) {
             return nullResult
         }
-        return regexesWithOpts.any { it.matches(message) }
+        return regexesWithOpts.any {
+            try {
+                it.matches(message)
+            } catch (t: Throwable) {
+                logger.log(Level.SEVERE, "Error parsing pattern! ${t.javaClass}:${t.message}. Message:${message}. Pattern:${it}")
+                return@any false
+            }
+        }
     }
 
+    companion object {
+        protected val logger: Logger = Logger.getLogger(this.javaClass.name)
+    }
 
 }
