@@ -40,7 +40,7 @@ val javaVersion = JavaVersion.VERSION_21
 val env = "RELEASE"
 
 group = "com.alcosi"
-version = "1.29-$env"
+version = "1.30-$env"
 java.sourceCompatibility = javaVersion
 
 idea {
@@ -134,7 +134,7 @@ configurations {
 dependencies {
     compileOnly("org.springframework.boot:spring-boot-starter:3.3.2")
     compileOnly("org.springframework.boot:spring-boot-starter-web:3.3.2")
-    api("io.github.breninsul:rest-template-logging-interceptor:1.2.5")
+    api("io.github.breninsul:rest-template-logging-interceptor:1.2.6")
     api("org.apache.httpcomponents.client5:httpclient5:5.3.1")
     api("commons-codec:commons-codec:1.17.0")
     api("com.squareup.wire:wire-grpc-client:4.9.9")
