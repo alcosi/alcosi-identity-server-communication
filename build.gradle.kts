@@ -7,7 +7,7 @@ import com.github.jk1.license.LicenseReportExtension
 /** This plugin is only used to generate DEPENDENCIES.md file */
 buildscript {
     dependencies {
-        classpath("com.alcosi:dependency-license-page-generator:1.0.0")
+        classpath("com.alcosi:dependency-license-page-generator:1.0.2")
     }
 }
 plugins {
@@ -16,7 +16,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.allopen") version "2.0.0"
     id("org.jetbrains.kotlin.plugin.serialization") version "2.0.0"
     id("com.bmuschko.docker-remote-api") version "9.4.0"
-    id("org.springframework.boot") version "3.3.2"
+    id("org.springframework.boot") version "3.3.3"
     id("io.spring.dependency-management") version "1.1.5"
     id("java-library")
     id("maven-publish")
@@ -40,7 +40,7 @@ val javaVersion = JavaVersion.VERSION_21
 val env = "RELEASE"
 
 group = "com.alcosi"
-version = "1.30-$env"
+version = "1.31-$env"
 java.sourceCompatibility = javaVersion
 
 idea {
@@ -132,9 +132,9 @@ configurations {
 
 
 dependencies {
-    compileOnly("org.springframework.boot:spring-boot-starter:3.3.2")
-    compileOnly("org.springframework.boot:spring-boot-starter-web:3.3.2")
-    api("io.github.breninsul:rest-template-logging-interceptor:1.2.6")
+    compileOnly("org.springframework.boot:spring-boot-starter:3.3.3")
+    compileOnly("org.springframework.boot:spring-boot-starter-web:3.3.3")
+    api("io.github.breninsul:rest-template-logging-interceptor:1.3.0")
     api("org.apache.httpcomponents.client5:httpclient5:5.3.1")
     api("commons-codec:commons-codec:1.17.0")
     api("com.squareup.wire:wire-grpc-client:4.9.9")
