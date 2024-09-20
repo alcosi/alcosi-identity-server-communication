@@ -5,7 +5,7 @@ import com.alcosi.identity.dto.api.IdentityUserInfoAccountRs
 import com.alcosi.identity.dto.domain.IdentityDomainUserIntrospectInfo
 import com.alcosi.identity.dto.domain.toDomain
 import com.alcosi.identity.exception.IdentityException
-import com.alcosi.identity.exception.ids.IdentityExpiredOrInvalidTokenException
+import com.alcosi.identity.exception.ids.IdentityExpiredOrInvalidRefreshTokenException
 import com.alcosi.identity.exception.ids.IdentityGetAccountIdByTokenException
 import com.alcosi.identity.service.error.parseExceptionAndExchange
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -25,7 +25,7 @@ interface IdentityGetProfileIdByTokenComponent:IdentityProfileIdByTokenProvider 
      * @param token The authentication token.
      * @return The profile ID with info about two auth associated with the
      *     token.
-     * @throws IdentityExpiredOrInvalidTokenException If the token is expired
+     * @throws IdentityExpiredOrInvalidRefreshTokenException If the token is expired
      *     or invalid.
      * @throws IdentityGetAccountIdByTokenException If an error occurs while
      *     retrieving the user ID.
@@ -72,7 +72,7 @@ interface IdentityGetProfileIdByTokenComponent:IdentityProfileIdByTokenProvider 
          * @param token The authentication token.
          * @return The profile ID with info about two auth associated with the
          *     token.
-         * @throws IdentityExpiredOrInvalidTokenException If the token is expired
+         * @throws IdentityExpiredOrInvalidRefreshTokenException If the token is expired
          *     or invalid.
          * @throws IdentityGetAccountIdByTokenException If an error occurs while
          *     retrieving the user ID.
@@ -92,7 +92,7 @@ interface IdentityGetProfileIdByTokenComponent:IdentityProfileIdByTokenProvider 
                             val account = mappingHelper.readValue(body, IdentityUserInfoAccountRs::class.java)
                             return@parseExceptionAndExchange account.toDomain()
                         } else if (clientResponse.statusCode.value() == 401) {
-                            throw IdentityExpiredOrInvalidTokenException(clientResponse.statusCode.value(), body)
+                            throw IdentityExpiredOrInvalidRefreshTokenException(clientResponse.statusCode.value(), body)
                         } else {
                             throw IdentityGetAccountIdByTokenException(clientResponse.statusCode.value(), body)
                         }
@@ -108,7 +108,7 @@ interface IdentityGetProfileIdByTokenComponent:IdentityProfileIdByTokenProvider 
          *
          * @param token The authentication token.
          * @return The identity profile ID.
-         * @throws IdentityExpiredOrInvalidTokenException If the token is expired or invalid.
+         * @throws IdentityExpiredOrInvalidRefreshTokenException If the token is expired or invalid.
          * @throws IdentityGetAccountIdByTokenException If an error occurs while retrieving the profile ID.
          * @throws IdentityException If an unexpected exception occurs while processing the request.
          */

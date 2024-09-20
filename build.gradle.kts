@@ -40,7 +40,7 @@ val javaVersion = JavaVersion.VERSION_21
 val env = "RELEASE"
 
 group = "com.alcosi"
-version = "1.31-$env"
+version = "1.32-$env"
 java.sourceCompatibility = javaVersion
 
 idea {
@@ -139,7 +139,7 @@ dependencies {
     api("commons-codec:commons-codec:1.17.0")
     api("com.squareup.wire:wire-grpc-client:4.9.9")
     api("io.github.breninsul:configurable-transaction-template-starter:1.0.2")
-    api("io.github.breninsul:named-limited-virtual-thread-executor:1.0.1")
+    api("io.github.breninsul:named-limited-virtual-thread-executor:1.0.2")
     api("io.github.breninsul:jdbc-template-postgresql-types:1.0.8")
     api("io.github.breninsul:java-timer-scheduler-starter:1.0.3")
     api("io.github.breninsul:synchronization-starter:1.0.2")

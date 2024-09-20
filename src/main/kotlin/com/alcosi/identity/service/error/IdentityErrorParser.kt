@@ -101,7 +101,7 @@ interface IdentityErrorParser {
             ErrorConfig(RegexMessageErrorVoter(".*Password not set.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityNoPasswordParserException(msg, status) }),
             ErrorConfig(RegexMessageErrorVoter(listOf(".*Account hasn't been activated.*".toRegex(), ".*Account hasn\\\\u0027t been activated.*".toRegex())), MessageErrorSupplier { msg, status -> IdentityNotActivatedParserException(msg, status) }),
             ErrorConfig(RegexMessageErrorVoter(".*Invalid username or password.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityInvalidCredentialsParserException(msg, status) }),
-            ErrorConfig(RegexMessageErrorVoter(".*\\{\"error\"\\:\"invalid_grant\"\\}.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityInvalidTokenParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(".*\\{\"error\"\\:\"invalid_grant\"\\}.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityInvalidRefreshTokenParserException(msg, status) }),
             ErrorConfig(RegexMessageErrorVoter(".*Must be use 2FA code.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityUseTwoFaParserException(msg, status) }),
             ErrorConfig(RegexMessageErrorVoter(".*Must use the code from the authenticator.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityUseAuthentificatorParserException(msg, status) }),
         )
