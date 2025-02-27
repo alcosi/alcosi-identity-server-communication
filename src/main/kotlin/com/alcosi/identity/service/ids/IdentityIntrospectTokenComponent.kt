@@ -10,7 +10,7 @@ import com.alcosi.identity.exception.ids.IdentityIntrospectTokenException
 import com.alcosi.identity.exception.ids.IdentityInvalidTokenException
 import com.alcosi.identity.service.error.parseExceptionAndExchange
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.github.breninsul.logging.HttpConfigHeaders
+import io.github.breninsul.logging2.HttpConfigHeaders
 import org.apache.commons.codec.binary.Base64
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap

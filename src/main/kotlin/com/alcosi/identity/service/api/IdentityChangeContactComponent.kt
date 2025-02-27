@@ -10,7 +10,7 @@ import com.alcosi.identity.exception.IdentityException
 import com.alcosi.identity.exception.api.IdentityChangeProfileContactsException
 import com.alcosi.identity.service.error.parseExceptionAndExchange
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.github.breninsul.logging.HttpConfigHeaders
+import io.github.breninsul.logging2.HttpConfigHeaders
 import org.springframework.web.client.RestClient
 import java.net.URLEncoder
 import java.nio.charset.Charset

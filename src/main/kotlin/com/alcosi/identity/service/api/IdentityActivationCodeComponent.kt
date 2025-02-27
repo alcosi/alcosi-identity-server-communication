@@ -10,7 +10,7 @@ import com.alcosi.identity.exception.api.IdentityGetActivationCodeException
 import com.alcosi.identity.service.error.parseExceptionAndExchange
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.alcosi.identity.service.token.IdentityClientTokenHolder
-import io.github.breninsul.logging.HttpConfigHeaders
+import io.github.breninsul.logging2.HttpConfigHeaders
 import org.springframework.web.client.RestClient
 import java.util.logging.Level
 import java.util.logging.Logger

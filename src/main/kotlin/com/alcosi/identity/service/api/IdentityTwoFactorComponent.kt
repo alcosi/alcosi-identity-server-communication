@@ -1,7 +1,6 @@
 package com.alcosi.identity.service.api
 
 import com.alcosi.identity.config.IdentityServerProperties
-import com.alcosi.identity.config.URLPreparation
 import com.alcosi.identity.dto.api.Identity2FaAuthenticatorAddCodeRq
 import com.alcosi.identity.dto.api.Identity2FaAuthenticatorGenerateCodeRs
 import com.alcosi.identity.dto.api.Identity2FaCodeRs
@@ -15,7 +14,7 @@ import com.alcosi.identity.exception.api.*
 import com.alcosi.identity.service.error.parseExceptionAndExchange
 import com.alcosi.identity.service.token.IdentityClientTokenHolder
 import com.fasterxml.jackson.databind.ObjectMapper
-import io.github.breninsul.logging.HttpConfigHeaders
+import io.github.breninsul.logging2.HttpConfigHeaders
 import org.springframework.web.client.RestClient
 import java.util.logging.Level
 import java.util.logging.Logger
