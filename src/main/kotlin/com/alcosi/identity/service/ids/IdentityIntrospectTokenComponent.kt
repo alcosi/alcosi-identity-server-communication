@@ -10,7 +10,9 @@ import com.alcosi.identity.exception.ids.IdentityIntrospectTokenException
 import com.alcosi.identity.exception.ids.IdentityInvalidTokenException
 import com.alcosi.identity.service.error.parseExceptionAndExchange
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.github.breninsul.logging2.FormBodyType
 import io.github.breninsul.logging2.HttpConfigHeaders
+import io.github.breninsul.rest.logging.logRequestMaskBodyKeys
 import org.apache.commons.codec.binary.Base64
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
@@ -86,6 +88,7 @@ interface IdentityIntrospectTokenComponent : IdentityProfileIdByTokenProvider {
                     .uri(introspectUri)
                     .header("Authorization", "Basic ${getBasicAuth()}")
                     .headers { if (properties.disableBodyLoggingWithToken) it.set(HttpConfigHeaders.LOG_REQUEST_BODY,"false") }
+                    .logRequestMaskBodyKeys(mapOf(FormBodyType to setOf("token")))
                     .body(formData)
                     .parseExceptionAndExchange { _, clientResponse ->
                         val body = clientResponse.bodyTo(String::class.java)
@@ -127,3 +130,5 @@ interface IdentityIntrospectTokenComponent : IdentityProfileIdByTokenProvider {
         protected open fun getBasicAuth(): String = Base64.encodeBase64String("${properties.ids.introspectionClient.id}:${properties.ids.introspectionClient.secret}".toByteArray())
     }
 }
+
+

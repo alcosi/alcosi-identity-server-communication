@@ -7,7 +7,11 @@ import com.alcosi.identity.exception.IdentityException
 import com.alcosi.identity.exception.ids.IdentityUnknownTokenException
 import com.alcosi.identity.service.error.parseExceptionAndExchange
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.github.breninsul.logging2.FormBodyType
 import io.github.breninsul.logging2.HttpConfigHeaders
+import io.github.breninsul.logging2.JsonBodyType
+import io.github.breninsul.rest.logging.logRequestMaskBodyKeys
+import io.github.breninsul.rest.logging.logResponseMaskBodyKeys
 import org.springframework.http.MediaType
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.util.MultiValueMap
@@ -126,14 +130,21 @@ interface IdentityTokenComponent {
                     restClient
                         .post()
                         .uri(tokenUri)
-                        .headers { if (properties.disableBodyLoggingWithPassword) it.set(HttpConfigHeaders.LOG_REQUEST_BODY,"false") }
-                        .headers { if (properties.disableBodyLoggingWithCode) it.set(HttpConfigHeaders.LOG_REQUEST_BODY,"false") }
-                        .headers { if (properties.disableBodyLoggingWithToken) it.set(HttpConfigHeaders.LOG_RESPONSE_BODY,"false") }
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .setHeaders(
                             ip,
                             userAgent,
                         )
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .logRequestMaskBodyKeys(mapOf(FormBodyType to setOf("client_secret", "password", "code", "refresh_token")))
+                        .logResponseMaskBodyKeys(mapOf(JsonBodyType to setOf("access_token")))
+                        .headers { if (properties.disableBodyLoggingWithPassword) it.set(HttpConfigHeaders.LOG_REQUEST_BODY,"false") }
+                        .headers { if (properties.disableBodyLoggingWithCode) it.set(HttpConfigHeaders.LOG_REQUEST_BODY,"false") }
+                        .headers { if (properties.disableBodyLoggingWithToken) it.set(HttpConfigHeaders.LOG_RESPONSE_BODY,"false") }
+                        .setHeaders(
+                            ip,
+                            userAgent,
+                        )
+
                 return requestSpec
                     .body(formData)
                     .parseExceptionAndExchange { _, clientResponse ->
@@ -158,7 +169,7 @@ interface IdentityTokenComponent {
          * @param userAgent The User-Agent header for the request.
          * @return The modified RestClient.RequestBodySpec.
          */
-        protected open fun RestClient.RequestHeadersSpec<RestClient.RequestBodySpec>.setHeaders(
+        protected open fun RestClient.RequestHeadersSpec<*>.setHeaders(
             ip: String,
             userAgent: String?,
         ): RestClient.RequestBodySpec {
@@ -166,10 +177,10 @@ interface IdentityTokenComponent {
                 this
                     .header(properties.ids.ipHeader, ip)
             return if (userAgent.isNullOrBlank()) {
-                ipSpec
+                ipSpec as RestClient.RequestBodySpec
             } else {
                 ipSpec
-                    .header(properties.ids.userAgentHeader, userAgent)
+                    .header(properties.ids.userAgentHeader, userAgent) as RestClient.RequestBodySpec
             }
         }
     }
