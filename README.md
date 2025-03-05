@@ -27,7 +27,7 @@ repositories {
 ````kotlin
 dependencies {
 //Other dependencies
-    implementation("com.alcosi:alcosi-identity-server-communication:${version}")
+    implementation("com.alcosi:alcosi-identity-server-communication:2.02-RELEASE")
 //Other dependencies
 }
 ````
