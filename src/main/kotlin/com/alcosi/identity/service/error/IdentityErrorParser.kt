@@ -96,7 +96,6 @@ interface IdentityErrorParser {
             ErrorConfig(
                 RegexMessageErrorVoter(listOf(".*The Code must be at least.*".toRegex(), ".*invalid_grant.*Invalid code.*".toRegex(), ".*Invalid code.*invalid_grant.*".toRegex())),
                 MessageErrorSupplier { msg, status -> IdentityInvalidTwoFaParserException(msg, status) }),
-            ErrorConfig(RegexMessageErrorVoter(".*Password not set.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityLockedAccountParserException(msg, status) }),
             ErrorConfig(RegexMessageErrorVoter(".*User is locked out.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityLockedAccountParserException(msg, status) }),
             ErrorConfig(RegexMessageErrorVoter(".*Password not set.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityNoPasswordParserException(msg, status) }),
             ErrorConfig(RegexMessageErrorVoter(listOf(".*Account hasn't been activated.*".toRegex(), ".*Account hasn\\\\u0027t been activated.*".toRegex())), MessageErrorSupplier { msg, status -> IdentityNotActivatedParserException(msg, status) }),
