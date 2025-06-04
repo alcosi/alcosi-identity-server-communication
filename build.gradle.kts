@@ -59,38 +59,7 @@ java {
 
 val repo = "github.com/alcosi/alcosi-notification-service-communication"
 
-centralPortal {
-    pom {
-        packaging = "jar"
-        name.set(project.name)
-        description.set(
-            """
-### Library for low-level communication with Alcosi (C#) identity service with spring boot initialization.
-            """,
-        )
-        val repository = "https://$repo"
-        url.set(repository)
-        licenses {
-            license {
-                name.set("Apache 2.0")
-                url.set("http://www.apache.org/licenses/LICENSE-2.0")
-            }
-        }
-        scm {
-            connection.set("scm:$repository.git")
-            developerConnection.set("scm:git@$repo.git")
-            url.set(repository)
-        }
-        developers {
-            developer {
-                id.set("Alcosi")
-                name.set("Alcosi Group")
-                email.set("info@alcosi.com")
-                url.set("alcosi.com")
-            }
-        }
-    }
-}
+
 
 repositories {
     mavenCentral()
@@ -130,12 +99,12 @@ Library for low-level communication with Alcosi (C#) identity service with sprin
         """)
         val repository = "https://$repo"
         url.set(repository)
-//        licenses {
-//            license {
-//                name.set("Apache 2.0")
-//                url.set("http://www.apache.org/licenses/LICENSE-2.0")
-//            }
-//        }
+        licenses {
+            license {
+                name.set("Apache 2.0")
+                url.set("http://www.apache.org/licenses/LICENSE-2.0")
+            }
+        }
         scm {
             connection.set("scm:$repository.git")
             developerConnection.set("scm:git@$repo.git")
