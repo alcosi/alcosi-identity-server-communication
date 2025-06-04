@@ -147,6 +147,7 @@ interface IdentityErrorParser {
             ErrorConfig(RegexMessageErrorVoter(".*Authenticator_Fail.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityInvalidAuthentificatorCodeParserException(msg, status) }),
             ErrorConfig(RegexMessageErrorVoter(".*User_Already_Binded_Activated.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityProfileIsAlreadyRegisteredAndActivatedParserException(msg, status) }),
             ErrorConfig(RegexMessageErrorVoter(".*User_Already_Binded_Not_Activated.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityProfileIsAlreadyRegisteredButNotActivatedParserException(msg, status) }),
+            ErrorConfig(RegexMessageErrorVoter(".*User_Already_Exists.*".toRegex()), MessageErrorSupplier { msg, status -> IdentityProfileIsAlreadyExistsParserException(msg, status) }),
             ErrorConfig(RegexMessageErrorVoter(listOf(".*User_Already_Binded:.*".toRegex(), ".*User_Already_Binded .*".toRegex(), ".*User_Already_Binded".toRegex())), MessageErrorSupplier { msg, status -> IdentityProfileIsAlreadyRegisteredParserException(msg, status) }),
             )
 
