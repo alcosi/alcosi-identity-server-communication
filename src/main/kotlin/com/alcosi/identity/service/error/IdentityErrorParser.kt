@@ -22,44 +22,50 @@ package com.alcosi.identity.service.error
 import com.alcosi.identity.exception.parser.api.*
 import com.alcosi.identity.exception.parser.ids.*
 import org.springframework.web.client.RestClient
+import java.util.function.Supplier
 
 interface IdentityErrorParser {
     /**
      * Process the exception related to the IDS.
      *
-     * @param response The response object from the REST client.
+     * @param responseStatus The response status http code.
+     * @param responseBodySupplier The response status http code.
      */
-    fun processIdsException(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse)
+    fun processIdsException(responseStatus:Int ,responseBodySupplier : Supplier<String>)
 
     /**
      * Finds an exception based on the given REST client response.
      *
-     * @param response The response object from the REST client.
+     * @param responseStatus The response status http code.
+     * @param responseBodySupplier The response status http code.
      * @return The throwable exception found based on the response, or null if no exception is found.
      */
-    fun findIdsException(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse): Throwable?
+    fun findIdsException(responseStatus:Int ,responseBodySupplier : Supplier<String>): Throwable?
 
     /**
      * Processes the API exception based on the given REST client response.
      *
-     * @param response The response object from the REST client.
+     * @param responseStatus The response status http code.
+     * @param responseBodySupplier The response status http code.
      */
-    fun processApiException(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse)
+    fun processApiException(responseStatus:Int ,responseBodySupplier : Supplier<String>)
 
     /**
      * Finds an API exception based on the given REST client response.
      *
-     * @param response The response object from the REST client.
+     * @param responseStatus The response status http code.
+     * @param responseBodySupplier The response status http code.
      * @return The throwable exception found based on the response, or null if no exception is found.
      */
-    fun findApiException(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse): Throwable?
+    fun findApiException(responseStatus:Int ,responseBodySupplier : Supplier<String>): Throwable?
 
     /**
      * Processes any exception that may occur during the execution of the REST client request.
      *
-     * @param response The response object from the REST client.
+     * @param responseStatus The response status http code.
+     * @param responseBodySupplier The response status http code.
      */
-    fun processAnyException(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse)
+    fun processAnyException(responseStatus:Int ,responseBodySupplier : Supplier<String>)
 
     /**
      * Throws the throwable if it exists.
@@ -149,50 +155,54 @@ interface IdentityErrorParser {
          *
          * @param response The response object from the REST client.
          */
-        override fun processIdsException(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse) {
-            val exception = findIdsException(response)
+        override fun processIdsException(responseStatus:Int ,responseBodySupplier : Supplier<String>) {
+            val exception = findIdsException(responseStatus,responseBodySupplier)
             exception.throwIfExist()
         }
 
         /**
          * Finds an exception based on the given REST client response.
          *
-         * @param response The response object from the REST client.
+         * @param responseStatus The response status http code.
+         * @param responseBodySupplier The response status http code.
          * @return The throwable exception found based on the response, or null if no exception is found.
          */
-        override fun findIdsException(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse): Throwable? {
-            val exception = idsList.firstOrNull() { it.voter.vote(response) }?.errorSupplier?.create(response)
+        override fun findIdsException(responseStatus:Int ,responseBodySupplier : Supplier<String>): Throwable? {
+            val exception = idsList.firstOrNull() { it.voter.vote(responseStatus,responseBodySupplier) }?.errorSupplier?.create(responseStatus,responseBodySupplier)
             return exception
         }
 
         /**
          * Processes the API exception based on the given REST client response.
          *
-         * @param response The response object from the REST client.
+         * @param responseStatus The response status http code.
+         * @param responseBodySupplier The response status http code.
          */
-        override fun processApiException(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse) {
-            val exception = findApiException(response)
+        override fun processApiException(responseStatus:Int ,responseBodySupplier : Supplier<String>) {
+            val exception = findApiException(responseStatus,responseBodySupplier)
             exception.throwIfExist()
         }
 
         /**
          * Finds an API exception based on the given REST client response.
          *
-         * @param response The response object from the REST client.
+         * @param responseStatus The response status http code.
+         * @param responseBodySupplier The response status http code.
          * @return The throwable exception found based on the response, or null if no exception is found.
          */
-        override fun findApiException(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse): Throwable? {
-            val exception = apiList.firstOrNull() { it.voter.vote(response) }?.errorSupplier?.create(response)
+        override fun findApiException(responseStatus:Int ,responseBodySupplier : Supplier<String>): Throwable? {
+            val exception = apiList.firstOrNull() { it.voter.vote(responseStatus,responseBodySupplier) }?.errorSupplier?.create(responseStatus,responseBodySupplier)
             return exception
         }
 
         /**
          * Processes any exception that may occur during the execution of the REST client request.
          *
-         * @param response The response object from the REST client.
+         * @param responseStatus The response status http code.
+         * @param responseBodySupplier The response status http code.
          */
-        override fun processAnyException(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse) {
-            val exception = findIdsException(response) ?: findApiException(response)
+        override fun processAnyException(responseStatus:Int ,responseBodySupplier : Supplier<String>) {
+            val exception = findIdsException(responseStatus,responseBodySupplier) ?: findApiException(responseStatus ,responseBodySupplier)
             exception.throwIfExist()
         }
 
@@ -229,7 +239,7 @@ object IdentityErrorParserHolder  {
  * Parses the response from the REST client and throws any possible exception that may occur during the execution of the REST client request.
  */
 fun RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse.parseAndThrowPossibleException() {
-    IdentityErrorParserHolder.errorParser.processAnyException(this)
+    IdentityErrorParserHolder.errorParser.processAnyException(this.statusCode.value()) { this.bodyTo(String::class.java) ?: "" }
 }
 
 /**

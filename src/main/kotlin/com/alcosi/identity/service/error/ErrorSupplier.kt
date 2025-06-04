@@ -19,11 +19,11 @@
 
 package com.alcosi.identity.service.error
 
-import org.springframework.web.client.RestClient
+import java.util.function.Supplier
 
 /**
  * Represents a supplier of error instances.
  */
 fun interface ErrorSupplier {
-    fun create(response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse): Throwable?
+    fun create(responseStatus:Int,responseBodySupplier: Supplier<String>): Throwable?
 }

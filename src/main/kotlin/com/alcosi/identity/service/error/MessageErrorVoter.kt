@@ -20,6 +20,7 @@
 package com.alcosi.identity.service.error
 
 import org.springframework.web.client.RestClient
+import java.util.function.Supplier
 
 /**
  * Represents a functional interface for voting on whether an error message should be handled.
@@ -27,11 +28,11 @@ import org.springframework.web.client.RestClient
  * This interface extends the ErrorVoter interface.
  */
 fun interface MessageErrorVoter : ErrorVoter {
-    override fun vote( response: RestClient.RequestHeadersSpec.ConvertibleClientHttpResponse): Boolean {
-        return if (response.statusCode.is2xxSuccessful) {
+    override fun vote(responseStatus:Int ,responseBodySupplier : Supplier<String>): Boolean {
+        return if (responseStatus>=200 && responseStatus<=299) {
             false
         } else {
-            vote( response.bodyTo(String::class.java), response.statusCode.value())
+            vote( responseBodySupplier.get(), responseStatus)
         }
     }
 
